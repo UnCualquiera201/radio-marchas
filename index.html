@@ -8,7 +8,9 @@
 
 <body>
 
+<div id="radioFondo">
     <h1>Radio Marchas</h1>
+</div>
 
     <p id="estado">Conectando con Firebase...</p>
 
@@ -48,6 +50,21 @@
         const cancionesRef = ref(db, "canciones");
         let listaCanciones = [];
         let datosCanciones = {};
+        function actualizarFondo(cancion) {
+    const radioFondo = document.getElementById("radioFondo");
+
+    if (cancion && cancion.imagen) {
+        radioFondo.style.backgroundImage = `url("${cancion.imagen}")`;
+
+        const posicionX = cancion.posicionX !== undefined ? cancion.posicionX : 50;
+        const posicionY = cancion.posicionY !== undefined ? cancion.posicionY : 50;
+
+        radioFondo.style.backgroundPosition =
+            `${posicionX}% ${posicionY}%`;
+    } else {
+        radioFondo.style.backgroundImage = "none";
+    }
+}
         let indiceActual = 0;
         function mostrarCola(canciones) {
     const cola = document.getElementById("cola");
@@ -104,6 +121,7 @@
 
         document.getElementById("interpreta").textContent =
             cancion.interpreta ? "Interpreta: " + cancion.interpreta : "";
+        actualizarFondo(cancion);
 
         if (cancion.audio) {
             audioElement.src = cancion.audio;
@@ -152,6 +170,12 @@ onValue(cancionesRef, (snapshot) => {
         });
         // Cargar el audio de la canción
 const audioElement = document.getElementById("audio");
+audioElement.addEventListener("ended", () => {
+    if (indiceActual < listaCanciones.length - 1) {
+        cargarCancion(indiceActual + 1);
+        audioElement.play();
+    }
+});
 const playButton = document.getElementById("play");
 const previousButton = document.getElementById("previous");
 const nextButton = document.getElementById("next");
