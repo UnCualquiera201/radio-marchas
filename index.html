@@ -47,6 +47,24 @@
         const cancionesRef = ref(db, "canciones");
         let listaCanciones = [];
         let indiceActual = 0;
+        function mostrarCola() {
+    const cola = document.getElementById("cola");
+    cola.innerHTML = "";
+
+    for (let i = indiceActual + 1; i < listaCanciones.length; i++) {
+        const idCancion = listaCanciones[i];
+
+        const tarjeta = document.createElement("div");
+        tarjeta.style.border = "1px solid #ccc";
+        tarjeta.style.padding = "15px";
+        tarjeta.style.marginTop = "10px";
+        tarjeta.style.borderRadius = "10px";
+
+        tarjeta.textContent = idCancion;
+
+        cola.appendChild(tarjeta);
+    }
+}
         function cargarCancion(indice) {
     if (listaCanciones.length === 0) return;
 
@@ -86,6 +104,8 @@ onValue(cancionesRef, (snapshot) => {
     if (canciones) {
         listaCanciones = Object.keys(canciones);
         console.log("Canciones:", listaCanciones);
+
+        mostrarCola();
     }
 });
         onValue(radioRef, (snapshot) => {
