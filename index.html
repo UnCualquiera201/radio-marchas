@@ -47,7 +47,32 @@
         const cancionesRef = ref(db, "canciones");
         let listaCanciones = [];
         let indiceActual = 0;
-        function mostrarCola() {
+        function mostrarCola(canciones) {
+    const cola = document.getElementById("cola");
+    cola.innerHTML = "";
+
+    for (let i = indiceActual + 1; i < listaCanciones.length; i++) {
+        const idCancion = listaCanciones[i];
+        const datosCancion = canciones[idCancion];
+
+        const tarjeta = document.createElement("div");
+
+        tarjeta.style.border = "1px solid #ccc";
+        tarjeta.style.padding = "15px";
+        tarjeta.style.marginTop = "10px";
+        tarjeta.style.borderRadius = "10px";
+
+        tarjeta.innerHTML = `
+            <strong>${datosCancion.titulo || ""}</strong>
+            ${datosCancion.compositor ? "<br>Compositor: " + datosCancion.compositor : ""}
+            ${datosCancion.arreglo ? "<br>Arreglo: " + datosCancion.arreglo : ""}
+            ${datosCancion.rearmonizacion ? "<br>Rearmonización: " + datosCancion.rearmonizacion : ""}
+            ${datosCancion.interpreta ? "<br>Interpreta: " + datosCancion.interpreta : ""}
+        `;
+
+        cola.appendChild(tarjeta);
+    }
+}
     const cola = document.getElementById("cola");
     cola.innerHTML = "";
 
@@ -60,7 +85,15 @@
         tarjeta.style.marginTop = "10px";
         tarjeta.style.borderRadius = "10px";
 
-        tarjeta.textContent = idCancion;
+        const datosCancion = canciones[idCancion];
+
+tarjeta.innerHTML = `
+    <strong>${datosCancion.titulo || ""}</strong>
+    ${datosCancion.compositor ? "<br>Compositor: " + datosCancion.compositor : ""}
+    ${datosCancion.arreglo ? "<br>Arreglo: " + datosCancion.arreglo : ""}
+    ${datosCancion.rearmonizacion ? "<br>Rearmonización: " + datosCancion.rearmonizacion : ""}
+    ${datosCancion.interpreta ? "<br>Interpreta: " + datosCancion.interpreta : ""}
+`;
 
         cola.appendChild(tarjeta);
     }
