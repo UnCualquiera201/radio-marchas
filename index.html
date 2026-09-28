@@ -22,6 +22,7 @@
 <button id="pause">⏸️ Pausa</button>
 <button id="stop">⏹️ Stop</button>
 <button id="previous">⏮️ Anterior</button>
+<button id="next">⏭️ Siguiente</button>
     
 <audio id="audio"></audio>
 <div id="cola"></div>
@@ -150,6 +151,14 @@ onValue(cancionesRef, (snapshot) => {
 const audioElement = document.getElementById("audio");
 const playButton = document.getElementById("play");
 const previousButton = document.getElementById("previous");
+const nextButton = document.getElementById("next");
+
+nextButton.addEventListener("click", () => {
+    if (indiceActual < listaCanciones.length - 1) {
+        cargarCancion(indiceActual + 1);
+        audioElement.play();
+    }
+});
 
 previousButton.addEventListener("click", () => {
     if (indiceActual > 0) {
