@@ -42,7 +42,7 @@
         const db = getDatabase(app);
 
         const radioRef = ref(db, "radio");
-        const cancionRef = ref(db, "canciones/marcha2");
+        const cancionRef = ref(db, "canciones/marcha1");
 
         onValue(radioRef, (snapshot) => {
             const radio = snapshot.val();
