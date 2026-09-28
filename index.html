@@ -1,16 +1,29 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Radio Marchas</title>
+
+    <style>
+        #radioFondo {
+            width: 100%;
+            min-height: 200px;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            padding: 30px;
+            box-sizing: border-box;
+        }
+    </style>
 </head>
 
 <body>
 
-<div id="radioFondo">
-    <h1>Radio Marchas</h1>
-</div>
+    <div id="radioFondo">
+        <h1>Radio Marchas</h1>
+    </div>
 
     <p id="estado">Conectando con Firebase...</p>
 
@@ -20,17 +33,26 @@
     <p id="arreglo"></p>
     <p id="rearmonizacion"></p>
     <p id="interpreta"></p>
-<button id="play">▶️ Play</button>
-<button id="pause">⏸️ Pausa</button>
-<button id="stop">⏹️ Stop</button>
-<button id="previous">⏮️ Anterior</button>
-<button id="next">⏭️ Siguiente</button>
-    
-<audio id="audio"></audio>
-<div id="cola"></div>
+
+    <button id="play">▶️ Play</button>
+    <button id="pause">⏸️ Pausa</button>
+    <button id="stop">⏹️ Stop</button>
+    <button id="previous">⏮️ Anterior</button>
+    <button id="next">⏭️ Siguiente</button>
+
+    <audio id="audio"></audio>
+
+    <div id="cola"></div>
+
     <script type="module">
+
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+        import {
+            getDatabase,
+            ref,
+            onValue
+        } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+
 
         const firebaseConfig = {
             apiKey: "AIzaSyBCKrD4b9-LyokfCtvxm1j18_J35O6w9AQ",
@@ -42,195 +64,383 @@
             appId: "1:190263587385:web:1c6a77e370c0103da913e8"
         };
 
+
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
+
 
         const radioRef = ref(db, "radio");
         const cancionRef = ref(db, "canciones/marcha1");
         const cancionesRef = ref(db, "canciones");
+
+
+        const audioElement = document.getElementById("audio");
+
+
         let listaCanciones = [];
-        function actualizarFondo(cancion) {
-    const radioFondo = document.getElementById("radioFondo");
-
-    if (cancion && cancion.imagen) {
-        radioFondo.style.backgroundImage = `url("${cancion.imagen}")`;
-
-        const posicionX = cancion.posicionX !== undefined ? cancion.posicionX : 50;
-        const posicionY = cancion.posicionY !== undefined ? cancion.posicionY : 50;
-
-        radioFondo.style.backgroundPosition =
-            `${posicionX}% ${posicionY}%`;
-    }
-}
-        let datosCanciones = {};
-        function actualizarFondo(cancion) {
-    const radioFondo = document.getElementById("radioFondo");
-
-    if (cancion && cancion.imagen) {
-        radioFondo.style.backgroundImage = `url("${cancion.imagen}")`;
-
-        const posicionX = cancion.posicionX !== undefined ? cancion.posicionX : 50;
-        const posicionY = cancion.posicionY !== undefined ? cancion.posicionY : 50;
-
-        radioFondo.style.backgroundPosition =
-            `${posicionX}% ${posicionY}%`;
-    } else {
-        radioFondo.style.backgroundImage = "none";
-    }
-}
         let indiceActual = 0;
+        let datosCanciones = {};
+
+
+        // =========================
+        // FONDO DE LA RADIO
+        // =========================
+
+        function actualizarFondo(cancion) {
+
+            const radioFondo = document.getElementById("radioFondo");
+
+            if (!cancion || !cancion.imagen) {
+                radioFondo.style.backgroundImage = "none";
+                return;
+            }
+
+            radioFondo.style.backgroundImage =
+                `url("${cancion.imagen}")`;
+
+            const posicionX =
+                cancion.posicionX !== undefined
+                    ? cancion.posicionX
+                    : 50;
+
+            const posicionY =
+                cancion.posicionY !== undefined
+                    ? cancion.posicionY
+                    : 50;
+
+            radioFondo.style.backgroundPosition =
+                `${posicionX}% ${posicionY}%`;
+        }
+
+
+        // =========================
+        // MOSTRAR COLA
+        // =========================
+
         function mostrarCola(canciones) {
-    const cola = document.getElementById("cola");
-    cola.innerHTML = "";
 
-    for (let i = indiceActual + 1; i < listaCanciones.length; i++) {
-        const idCancion = listaCanciones[i];
-        const datosCancion = canciones[idCancion];
+            const cola = document.getElementById("cola");
 
-        const tarjeta = document.createElement("div");
+            cola.innerHTML = "";
 
-        tarjeta.style.border = "1px solid #ccc";
-        tarjeta.style.padding = "15px";
-        tarjeta.style.marginTop = "10px";
-        tarjeta.style.borderRadius = "10px";
+            for (
+                let i = indiceActual + 1;
+                i < listaCanciones.length;
+                i++
+            ) {
 
-        tarjeta.innerHTML = `
-            <strong>${datosCancion.titulo || ""}</strong>
-            ${datosCancion.compositor ? "<br>Compositor: " + datosCancion.compositor : ""}
-            ${datosCancion.arreglo ? "<br>Arreglo: " + datosCancion.arreglo : ""}
-            ${datosCancion.rearmonizacion ? "<br>Rearmonización: " + datosCancion.rearmonizacion : ""}
-            ${datosCancion.interpreta ? "<br>Interpreta: " + datosCancion.interpreta : ""}
-        `;
+                const idCancion = listaCanciones[i];
+                const datosCancion = canciones[idCancion];
 
-        cola.appendChild(tarjeta);
-    }
-}
+                const tarjeta = document.createElement("div");
+
+                tarjeta.style.border = "1px solid #ccc";
+                tarjeta.style.padding = "15px";
+                tarjeta.style.marginTop = "10px";
+                tarjeta.style.borderRadius = "10px";
+
+                tarjeta.innerHTML = `
+                    <strong>${datosCancion.titulo || ""}</strong>
+
+                    ${
+                        datosCancion.compositor
+                            ? "<br>Compositor: " + datosCancion.compositor
+                            : ""
+                    }
+
+                    ${
+                        datosCancion.arreglo
+                            ? "<br>Arreglo: " + datosCancion.arreglo
+                            : ""
+                    }
+
+                    ${
+                        datosCancion.rearmonizacion
+                            ? "<br>Rearmonización: " + datosCancion.rearmonizacion
+                            : ""
+                    }
+
+                    ${
+                        datosCancion.interpreta
+                            ? "<br>Interpreta: " + datosCancion.interpreta
+                            : ""
+                    }
+                `;
+
+                cola.appendChild(tarjeta);
+            }
+        }
+
+
+        // =========================
+        // CARGAR CANCIÓN
+        // =========================
 
         function cargarCancion(indice) {
-    if (listaCanciones.length === 0) return;
 
-    indiceActual = indice;
-    mostrarCola(datosCanciones);
+            if (listaCanciones.length === 0) return;
 
-    const ruta = "canciones/" + listaCanciones[indiceActual];
-    const nuevaCancionRef = ref(db, ruta);
+            indiceActual = indice;
 
-    onValue(nuevaCancionRef, (snapshot) => {
-        const cancion = snapshot.val();
+            mostrarCola(datosCanciones);
 
-        if (!cancion) return;
+            const ruta =
+                "canciones/" + listaCanciones[indiceActual];
 
-        document.getElementById("titulo").textContent =
-            cancion.titulo || "";
+            const nuevaCancionRef = ref(db, ruta);
 
-        document.getElementById("compositor").textContent =
-            cancion.compositor ? "Compositor: " + cancion.compositor : "";
 
-        document.getElementById("arreglo").textContent =
-            cancion.arreglo ? "Arreglo: " + cancion.arreglo : "";
+            onValue(nuevaCancionRef, (snapshot) => {
 
-        document.getElementById("rearmonizacion").textContent =
-            cancion.rearmonizacion ? "Rearmonización: " + cancion.rearmonizacion : "";
+                const cancion = snapshot.val();
 
-        document.getElementById("interpreta").textContent =
-            cancion.interpreta ? "Interpreta: " + cancion.interpreta : "";
-        actualizarFondo(cancion);
+                if (!cancion) return;
 
-        if (cancion.audio) {
-            audioElement.src = cancion.audio;
-        }
-    });
-}
-onValue(cancionesRef, (snapshot) => {
-    const canciones = snapshot.val();
-    datosCanciones = canciones;
 
-    if (canciones) {
-        listaCanciones = Object.keys(canciones);
-        console.log("Canciones:", listaCanciones);
-
-        mostrarCola(canciones);
-    }
-});
-        onValue(radioRef, (snapshot) => {
-            const radio = snapshot.val();
-
-            if (radio) {
-                document.getElementById("estado").textContent =
-                    "Estado: " + radio.estado;
-            }
-        });
-
-        onValue(cancionRef, (snapshot) => {
-            const cancion = snapshot.val();
-
-            if (cancion) {
                 document.getElementById("titulo").textContent =
                     cancion.titulo || "";
 
+
                 document.getElementById("compositor").textContent =
-                    cancion.compositor ? "Compositor: " + cancion.compositor : "";
+                    cancion.compositor
+                        ? "Compositor: " + cancion.compositor
+                        : "";
+
 
                 document.getElementById("arreglo").textContent =
-                    cancion.arreglo ? "Arreglo: " + cancion.arreglo : "";
+                    cancion.arreglo
+                        ? "Arreglo: " + cancion.arreglo
+                        : "";
+
 
                 document.getElementById("rearmonizacion").textContent =
-                    cancion.rearmonizacion ? "Rearmonización: " + cancion.rearmonizacion : "";
+                    cancion.rearmonizacion
+                        ? "Rearmonización: " + cancion.rearmonizacion
+                        : "";
+
 
                 document.getElementById("interpreta").textContent =
-                    cancion.interpreta ? "Interpreta: " + cancion.interpreta : "";
+                    cancion.interpreta
+                        ? "Interpreta: " + cancion.interpreta
+                        : "";
+
+
+                // CAMBIAR FONDO
+                actualizarFondo(cancion);
+
+
+                // CAMBIAR AUDIO
+                if (cancion.audio) {
+                    audioElement.src = cancion.audio;
+                }
+
+            });
+
+        }
+
+
+        // =========================
+        // CARGAR LISTA DE CANCIONES
+        // =========================
+
+        onValue(cancionesRef, (snapshot) => {
+
+            const canciones = snapshot.val();
+
+            datosCanciones = canciones || {};
+
+            if (canciones) {
+
+                listaCanciones =
+                    Object.keys(canciones);
+
+                console.log(
+                    "Canciones:",
+                    listaCanciones
+                );
+
+                mostrarCola(canciones);
             }
+
         });
-        // Cargar el audio de la canción
-const audioElement = document.getElementById("audio");
-audioElement.addEventListener("ended", () => {
-    if (indiceActual < listaCanciones.length - 1) {
-        cargarCancion(indiceActual + 1);
-        audioElement.play();
-    }
-});
-const playButton = document.getElementById("play");
-const previousButton = document.getElementById("previous");
-const nextButton = document.getElementById("next");
 
-nextButton.addEventListener("click", () => {
-    if (indiceActual < listaCanciones.length - 1) {
-        cargarCancion(indiceActual + 1);
-        audioElement.play();
-    }
-});
 
-previousButton.addEventListener("click", () => {
-    if (indiceActual > 0) {
-        cargarCancion(indiceActual - 1);
-        audioElement.play();
-    }
-});
+        // =========================
+        // ESTADO DE LA RADIO
+        // =========================
 
-onValue(cancionRef, (snapshot) => {
-    const cancion = snapshot.val();
+        onValue(radioRef, (snapshot) => {
 
-    if (cancion && cancion.audio) {
-        audioElement.src = cancion.audio;
-    }
-});
+            const radio = snapshot.val();
 
-// Botón Play
-playButton.addEventListener("click", () => {
-    audioElement.play();
-});
-// Botón Pausa
-const pauseButton = document.getElementById("pause");
+            if (radio) {
 
-pauseButton.addEventListener("click", () => {
-    audioElement.pause();
-});
-const stopButton = document.getElementById("stop");
+                document.getElementById("estado").textContent =
+                    "Estado: " + radio.estado;
 
-stopButton.addEventListener("click", () => {
-    audioElement.pause();
-    audioElement.currentTime = 0;
-});
+            }
+
+        });
+
+
+        // =========================
+        // CANCIÓN ACTUAL
+        // =========================
+
+        onValue(cancionRef, (snapshot) => {
+
+            const cancion = snapshot.val();
+
+            if (!cancion) return;
+
+
+            document.getElementById("titulo").textContent =
+                cancion.titulo || "";
+
+
+            document.getElementById("compositor").textContent =
+                cancion.compositor
+                    ? "Compositor: " + cancion.compositor
+                    : "";
+
+
+            document.getElementById("arreglo").textContent =
+                cancion.arreglo
+                    ? "Arreglo: " + cancion.arreglo
+                    : "";
+
+
+            document.getElementById("rearmonizacion").textContent =
+                cancion.rearmonizacion
+                    ? "Rearmonización: " + cancion.rearmonizacion
+                    : "";
+
+
+            document.getElementById("interpreta").textContent =
+                cancion.interpreta
+                    ? "Interpreta: " + cancion.interpreta
+                    : "";
+
+
+            // CAMBIAR FONDO
+            actualizarFondo(cancion);
+
+        });
+
+
+        // =========================
+        // CARGAR AUDIO DE MARCHA1
+        // =========================
+
+        onValue(cancionRef, (snapshot) => {
+
+            const cancion = snapshot.val();
+
+            if (cancion && cancion.audio) {
+                audioElement.src = cancion.audio;
+            }
+
+        });
+
+
+        // =========================
+        // AUTO AVANCE
+        // =========================
+
+        audioElement.addEventListener("ended", () => {
+
+            if (
+                indiceActual <
+                listaCanciones.length - 1
+            ) {
+
+                cargarCancion(indiceActual + 1);
+
+                audioElement.play();
+            }
+
+        });
+
+
+        // =========================
+        // BOTONES
+        // =========================
+
+        const playButton =
+            document.getElementById("play");
+
+        const pauseButton =
+            document.getElementById("pause");
+
+        const stopButton =
+            document.getElementById("stop");
+
+        const previousButton =
+            document.getElementById("previous");
+
+        const nextButton =
+            document.getElementById("next");
+
+
+        // PLAY
+
+        playButton.addEventListener("click", () => {
+
+            audioElement.play();
+
+        });
+
+
+        // PAUSA
+
+        pauseButton.addEventListener("click", () => {
+
+            audioElement.pause();
+
+        });
+
+
+        // STOP
+
+        stopButton.addEventListener("click", () => {
+
+            audioElement.pause();
+
+            audioElement.currentTime = 0;
+
+        });
+
+
+        // SIGUIENTE
+
+        nextButton.addEventListener("click", () => {
+
+            if (
+                indiceActual <
+                listaCanciones.length - 1
+            ) {
+
+                cargarCancion(indiceActual + 1);
+
+                audioElement.play();
+            }
+
+        });
+
+
+        // ANTERIOR
+
+        previousButton.addEventListener("click", () => {
+
+            if (indiceActual > 0) {
+
+                cargarCancion(indiceActual - 1);
+
+                audioElement.play();
+            }
+
+        });
+
     </script>
 
 </body>
