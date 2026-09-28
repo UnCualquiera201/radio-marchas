@@ -5,10 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Radio Marchas</title>
 </head>
+
 <body>
 
     <h1>Radio Marchas</h1>
-    <p>La radio está conectándose...</p>
+    <p id="estado">Conectando con Firebase...</p>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBCKrD4b9-LyokfCtvxm1j18_J35O6w9AQ",
+            authDomain: "radio-marchas.firebaseapp.com",
+            databaseURL: "https://radio-marchas-default-rtdb.firebaseio.com",
+            projectId: "radio-marchas",
+            storageBucket: "radio-marchas.firebasestorage.app",
+            messagingSenderId: "190263587385",
+            appId: "1:190263587385:web:1c6a77e370c0103da913e8"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const radioRef = ref(db, "radio");
+
+        onValue(radioRef, (snapshot) => {
+            const radio = snapshot.val();
+
+            if (radio) {
+                document.getElementById("estado").textContent =
+                    "Estado: " + radio.estado;
+            }
+        });
+    </script>
 
 </body>
 </html>
