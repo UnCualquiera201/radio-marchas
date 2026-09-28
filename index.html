@@ -44,6 +44,16 @@
         const radioRef = ref(db, "radio");
         const cancionRef = ref(db, "canciones/marcha1");
         const cancionesRef = ref(db, "canciones");
+        let listaCanciones = [];
+
+onValue(cancionesRef, (snapshot) => {
+    const canciones = snapshot.val();
+
+    if (canciones) {
+        listaCanciones = Object.keys(canciones);
+        console.log("Canciones:", listaCanciones);
+    }
+});
         onValue(radioRef, (snapshot) => {
             const radio = snapshot.val();
 
