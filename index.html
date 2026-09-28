@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="es">
 
@@ -9,12 +10,42 @@
     <style>
         #radioFondo {
             width: 100%;
-            min-height: 200px;
+            min-height: 300px;
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
             padding: 30px;
             box-sizing: border-box;
+        }
+
+        #editor {
+            margin-top: 25px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 12px;
+            max-width: 600px;
+        }
+
+        #editor select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+
+        #editor button {
+            padding: 10px 15px;
+            margin: 4px;
+            cursor: pointer;
+        }
+
+        .posicion {
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        #mensajeGuardado {
+            margin-top: 10px;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -44,13 +75,57 @@
 
     <div id="cola"></div>
 
+
+    <!-- ========================= -->
+    <!-- EDITOR DE POSICIÓN -->
+    <!-- ========================= -->
+
+    <div id="editor">
+
+        <h2>🖼️ Editor de imagen</h2>
+
+        <p>Selecciona una marcha:</p>
+
+        <select id="selectorCancion">
+            <option value="">Seleccionar marcha...</option>
+        </select>
+
+        <div class="posicion">
+            Posición X:
+            <span id="valorX">50</span>%
+        </div>
+
+        <button id="izquierda">⬅️ Izquierda</button>
+        <button id="derecha">➡️ Derecha</button>
+
+        <div class="posicion">
+            Posición Y:
+            <span id="valorY">50</span>%
+        </div>
+
+        <button id="arriba">⬆️ Arriba</button>
+        <button id="abajo">⬇️ Abajo</button>
+
+        <br><br>
+
+        <button id="guardar">
+            💾 Guardar posición
+        </button>
+
+        <p id="mensajeGuardado"></p>
+
+    </div>
+
+
     <script type="module">
 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+
         import {
             getDatabase,
             ref,
-            onValue
+            onValue,
+            update
         } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
 
@@ -74,43 +149,285 @@
         const cancionesRef = ref(db, "canciones");
 
 
-        const audioElement = document.getElementById("audio");
+        const audioElement =
+            document.getElementById("audio");
 
 
         let listaCanciones = [];
         let indiceActual = 0;
         let datosCanciones = {};
 
+        let cancionEditando = "";
+
+        let posicionX = 50;
+        let posicionY = 50;
+
 
         // =========================
-        // FONDO DE LA RADIO
+        // FONDO
         // =========================
 
         function actualizarFondo(cancion) {
 
-            const radioFondo = document.getElementById("radioFondo");
+            const radioFondo =
+                document.getElementById("radioFondo");
 
             if (!cancion || !cancion.imagen) {
+
                 radioFondo.style.backgroundImage = "none";
+
                 return;
             }
+
 
             radioFondo.style.backgroundImage =
                 `url("${cancion.imagen}")`;
 
-            const posicionX =
+
+            const x =
                 cancion.posicionX !== undefined
                     ? cancion.posicionX
                     : 50;
 
-            const posicionY =
+
+            const y =
                 cancion.posicionY !== undefined
                     ? cancion.posicionY
                     : 50;
 
+
+            radioFondo.style.backgroundPosition =
+                `${x}% ${y}%`;
+
+        }
+
+
+        // =========================
+        // EDITOR
+        // =========================
+
+        function cargarEditor(id) {
+
+            const cancion =
+                datosCanciones[id];
+
+            if (!cancion) return;
+
+
+            cancionEditando = id;
+
+
+            posicionX =
+                cancion.posicionX !== undefined
+                    ? Number(cancion.posicionX)
+                    : 50;
+
+
+            posicionY =
+                cancion.posicionY !== undefined
+                    ? Number(cancion.posicionY)
+                    : 50;
+
+
+            document.getElementById("valorX")
+                .textContent = posicionX;
+
+
+            document.getElementById("valorY")
+                .textContent = posicionY;
+
+
+            actualizarVistaEditor();
+
+        }
+
+
+        // =========================
+        // ACTUALIZAR VISTA
+        // =========================
+
+        function actualizarVistaEditor() {
+
+            const cancion =
+                datosCanciones[cancionEditando];
+
+            if (!cancion) return;
+
+
+            const radioFondo =
+                document.getElementById("radioFondo");
+
+
+            if (cancion.imagen) {
+
+                radioFondo.style.backgroundImage =
+                    `url("${cancion.imagen}")`;
+
+            }
+
+
             radioFondo.style.backgroundPosition =
                 `${posicionX}% ${posicionY}%`;
+
+
+            document.getElementById("valorX")
+                .textContent = posicionX;
+
+
+            document.getElementById("valorY")
+                .textContent = posicionY;
+
         }
+
+
+        // =========================
+        // SELECTOR
+        // =========================
+
+        const selector =
+            document.getElementById("selectorCancion");
+
+
+        selector.addEventListener("change", () => {
+
+            const id = selector.value;
+
+            if (!id) return;
+
+            cargarEditor(id);
+
+        });
+
+
+        // =========================
+        // MOVER IZQUIERDA
+        // =========================
+
+        document.getElementById("izquierda")
+            .addEventListener("click", () => {
+
+                posicionX -= 5;
+
+                if (posicionX < 0)
+                    posicionX = 0;
+
+                actualizarVistaEditor();
+
+            });
+
+
+        // =========================
+        // MOVER DERECHA
+        // =========================
+
+        document.getElementById("derecha")
+            .addEventListener("click", () => {
+
+                posicionX += 5;
+
+                if (posicionX > 100)
+                    posicionX = 100;
+
+                actualizarVistaEditor();
+
+            });
+
+
+        // =========================
+        // MOVER ARRIBA
+        // =========================
+
+        document.getElementById("arriba")
+            .addEventListener("click", () => {
+
+                posicionY -= 5;
+
+                if (posicionY < 0)
+                    posicionY = 0;
+
+                actualizarVistaEditor();
+
+            });
+
+
+        // =========================
+        // MOVER ABAJO
+        // =========================
+
+        document.getElementById("abajo")
+            .addEventListener("click", () => {
+
+                posicionY += 5;
+
+                if (posicionY > 100)
+                    posicionY = 100;
+
+                actualizarVistaEditor();
+
+            });
+
+
+        // =========================
+        // GUARDAR
+        // =========================
+
+        document.getElementById("guardar")
+            .addEventListener("click", async () => {
+
+                if (!cancionEditando) {
+
+                    alert("Selecciona una marcha primero.");
+
+                    return;
+                }
+
+
+                try {
+
+                    const cancionRefEditor =
+                        ref(
+                            db,
+                            "canciones/" +
+                            cancionEditando
+                        );
+
+
+                    await update(
+                        cancionRefEditor,
+                        {
+                            posicionX: posicionX,
+                            posicionY: posicionY
+                        }
+                    );
+
+
+                    datosCanciones[cancionEditando]
+                        .posicionX = posicionX;
+
+
+                    datosCanciones[cancionEditando]
+                        .posicionY = posicionY;
+
+
+                    document.getElementById(
+                        "mensajeGuardado"
+                    ).textContent =
+                        "✅ Posición guardada correctamente.";
+
+
+                } catch (error) {
+
+                    console.error(error);
+
+
+                    document.getElementById(
+                        "mensajeGuardado"
+                    ).textContent =
+                        "❌ No se pudo guardar.";
+
+                }
+
+            });
 
 
         // =========================
@@ -119,9 +436,11 @@
 
         function mostrarCola(canciones) {
 
-            const cola = document.getElementById("cola");
+            const cola =
+                document.getElementById("cola");
 
             cola.innerHTML = "";
+
 
             for (
                 let i = indiceActual + 1;
@@ -129,46 +448,71 @@
                 i++
             ) {
 
-                const idCancion = listaCanciones[i];
-                const datosCancion = canciones[idCancion];
+                const idCancion =
+                    listaCanciones[i];
 
-                const tarjeta = document.createElement("div");
+                const datosCancion =
+                    canciones[idCancion];
 
-                tarjeta.style.border = "1px solid #ccc";
-                tarjeta.style.padding = "15px";
-                tarjeta.style.marginTop = "10px";
-                tarjeta.style.borderRadius = "10px";
+
+                const tarjeta =
+                    document.createElement("div");
+
+
+                tarjeta.style.border =
+                    "1px solid #ccc";
+
+                tarjeta.style.padding =
+                    "15px";
+
+                tarjeta.style.marginTop =
+                    "10px";
+
+                tarjeta.style.borderRadius =
+                    "10px";
+
 
                 tarjeta.innerHTML = `
-                    <strong>${datosCancion.titulo || ""}</strong>
+
+                    <strong>
+                        ${datosCancion.titulo || ""}
+                    </strong>
 
                     ${
                         datosCancion.compositor
-                            ? "<br>Compositor: " + datosCancion.compositor
+                            ? "<br>Compositor: " +
+                              datosCancion.compositor
                             : ""
                     }
 
                     ${
                         datosCancion.arreglo
-                            ? "<br>Arreglo: " + datosCancion.arreglo
+                            ? "<br>Arreglo: " +
+                              datosCancion.arreglo
                             : ""
                     }
 
                     ${
                         datosCancion.rearmonizacion
-                            ? "<br>Rearmonización: " + datosCancion.rearmonizacion
+                            ? "<br>Rearmonización: " +
+                              datosCancion.rearmonizacion
                             : ""
                     }
 
                     ${
                         datosCancion.interpreta
-                            ? "<br>Interpreta: " + datosCancion.interpreta
+                            ? "<br>Interpreta: " +
+                              datosCancion.interpreta
                             : ""
                     }
+
                 `;
 
+
                 cola.appendChild(tarjeta);
+
             }
+
         }
 
 
@@ -178,270 +522,387 @@
 
         function cargarCancion(indice) {
 
-            if (listaCanciones.length === 0) return;
+            if (listaCanciones.length === 0)
+                return;
+
 
             indiceActual = indice;
 
+
             mostrarCola(datosCanciones);
 
+
             const ruta =
-                "canciones/" + listaCanciones[indiceActual];
-
-            const nuevaCancionRef = ref(db, ruta);
-
-
-            onValue(nuevaCancionRef, (snapshot) => {
-
-                const cancion = snapshot.val();
-
-                if (!cancion) return;
+                "canciones/" +
+                listaCanciones[indiceActual];
 
 
-                document.getElementById("titulo").textContent =
-                    cancion.titulo || "";
+            const nuevaCancionRef =
+                ref(db, ruta);
 
 
-                document.getElementById("compositor").textContent =
-                    cancion.compositor
-                        ? "Compositor: " + cancion.compositor
-                        : "";
+            onValue(
+                nuevaCancionRef,
+                (snapshot) => {
+
+                    const cancion =
+                        snapshot.val();
 
 
-                document.getElementById("arreglo").textContent =
-                    cancion.arreglo
-                        ? "Arreglo: " + cancion.arreglo
-                        : "";
+                    if (!cancion)
+                        return;
 
 
-                document.getElementById("rearmonizacion").textContent =
-                    cancion.rearmonizacion
-                        ? "Rearmonización: " + cancion.rearmonizacion
-                        : "";
+                    document.getElementById(
+                        "titulo"
+                    ).textContent =
+                        cancion.titulo || "";
 
 
-                document.getElementById("interpreta").textContent =
-                    cancion.interpreta
-                        ? "Interpreta: " + cancion.interpreta
-                        : "";
+                    document.getElementById(
+                        "compositor"
+                    ).textContent =
+                        cancion.compositor
+                            ? "Compositor: " +
+                              cancion.compositor
+                            : "";
 
 
-                // CAMBIAR FONDO
-                actualizarFondo(cancion);
+                    document.getElementById(
+                        "arreglo"
+                    ).textContent =
+                        cancion.arreglo
+                            ? "Arreglo: " +
+                              cancion.arreglo
+                            : "";
 
 
-                // CAMBIAR AUDIO
-                if (cancion.audio) {
-                    audioElement.src = cancion.audio;
+                    document.getElementById(
+                        "rearmonizacion"
+                    ).textContent =
+                        cancion.rearmonizacion
+                            ? "Rearmonización: " +
+                              cancion.rearmonizacion
+                            : "";
+
+
+                    document.getElementById(
+                        "interpreta"
+                    ).textContent =
+                        cancion.interpreta
+                            ? "Interpreta: " +
+                              cancion.interpreta
+                            : "";
+
+
+                    actualizarFondo(cancion);
+
+
+                    if (cancion.audio) {
+
+                        audioElement.src =
+                            cancion.audio;
+
+                    }
+
                 }
-
-            });
+            );
 
         }
 
 
         // =========================
-        // CARGAR LISTA DE CANCIONES
+        // CARGAR CANCIONES
         // =========================
 
-        onValue(cancionesRef, (snapshot) => {
+        onValue(
+            cancionesRef,
+            (snapshot) => {
 
-            const canciones = snapshot.val();
+                const canciones =
+                    snapshot.val();
 
-            datosCanciones = canciones || {};
 
-            if (canciones) {
+                datosCanciones =
+                    canciones || {};
 
-                listaCanciones =
-                    Object.keys(canciones);
 
-                console.log(
-                    "Canciones:",
-                    listaCanciones
-                );
+                if (canciones) {
 
-                mostrarCola(canciones);
+                    listaCanciones =
+                        Object.keys(canciones);
+
+
+                    console.log(
+                        "Canciones:",
+                        listaCanciones
+                    );
+
+
+                    mostrarCola(canciones);
+
+
+                    // CREAR SELECTOR
+
+                    selector.innerHTML =
+                        `<option value="">
+                            Seleccionar marcha...
+                         </option>`;
+
+
+                    listaCanciones.forEach(
+                        (id) => {
+
+                            const option =
+                                document.createElement(
+                                    "option"
+                                );
+
+
+                            option.value = id;
+
+
+                            option.textContent =
+                                canciones[id].titulo ||
+                                id;
+
+
+                            selector.appendChild(
+                                option
+                            );
+
+                        }
+                    );
+
+                }
+
             }
-
-        });
+        );
 
 
         // =========================
-        // ESTADO DE LA RADIO
+        // ESTADO
         // =========================
 
-        onValue(radioRef, (snapshot) => {
+        onValue(
+            radioRef,
+            (snapshot) => {
 
-            const radio = snapshot.val();
+                const radio =
+                    snapshot.val();
 
-            if (radio) {
 
-                document.getElementById("estado").textContent =
-                    "Estado: " + radio.estado;
+                if (radio) {
+
+                    document.getElementById(
+                        "estado"
+                    ).textContent =
+                        "Estado: " +
+                        radio.estado;
+
+                }
 
             }
-
-        });
+        );
 
 
         // =========================
         // CANCIÓN ACTUAL
         // =========================
 
-        onValue(cancionRef, (snapshot) => {
+        onValue(
+            cancionRef,
+            (snapshot) => {
 
-            const cancion = snapshot.val();
-
-            if (!cancion) return;
-
-
-            document.getElementById("titulo").textContent =
-                cancion.titulo || "";
+                const cancion =
+                    snapshot.val();
 
 
-            document.getElementById("compositor").textContent =
-                cancion.compositor
-                    ? "Compositor: " + cancion.compositor
-                    : "";
+                if (!cancion)
+                    return;
 
 
-            document.getElementById("arreglo").textContent =
-                cancion.arreglo
-                    ? "Arreglo: " + cancion.arreglo
-                    : "";
+                document.getElementById(
+                    "titulo"
+                ).textContent =
+                    cancion.titulo || "";
 
 
-            document.getElementById("rearmonizacion").textContent =
-                cancion.rearmonizacion
-                    ? "Rearmonización: " + cancion.rearmonizacion
-                    : "";
+                document.getElementById(
+                    "compositor"
+                ).textContent =
+                    cancion.compositor
+                        ? "Compositor: " +
+                          cancion.compositor
+                        : "";
 
 
-            document.getElementById("interpreta").textContent =
-                cancion.interpreta
-                    ? "Interpreta: " + cancion.interpreta
-                    : "";
+                document.getElementById(
+                    "arreglo"
+                ).textContent =
+                    cancion.arreglo
+                        ? "Arreglo: " +
+                          cancion.arreglo
+                        : "";
 
 
-            // CAMBIAR FONDO
-            actualizarFondo(cancion);
+                document.getElementById(
+                    "rearmonizacion"
+                ).textContent =
+                    cancion.rearmonizacion
+                        ? "Rearmonización: " +
+                          cancion.rearmonizacion
+                        : "";
 
-        });
+
+                document.getElementById(
+                    "interpreta"
+                ).textContent =
+                    cancion.interpreta
+                        ? "Interpreta: " +
+                          cancion.interpreta
+                        : "";
 
 
-        // =========================
-        // CARGAR AUDIO DE MARCHA1
-        // =========================
+                actualizarFondo(cancion);
 
-        onValue(cancionRef, (snapshot) => {
-
-            const cancion = snapshot.val();
-
-            if (cancion && cancion.audio) {
-                audioElement.src = cancion.audio;
             }
+        );
 
-        });
+
+        // =========================
+        // AUDIO
+        // =========================
+
+        onValue(
+            cancionRef,
+            (snapshot) => {
+
+                const cancion =
+                    snapshot.val();
+
+
+                if (
+                    cancion &&
+                    cancion.audio
+                ) {
+
+                    audioElement.src =
+                        cancion.audio;
+
+                }
+
+            }
+        );
 
 
         // =========================
         // AUTO AVANCE
         // =========================
 
-        audioElement.addEventListener("ended", () => {
+        audioElement.addEventListener(
+            "ended",
+            () => {
 
-            if (
-                indiceActual <
-                listaCanciones.length - 1
-            ) {
+                if (
+                    indiceActual <
+                    listaCanciones.length - 1
+                ) {
 
-                cargarCancion(indiceActual + 1);
+                    cargarCancion(
+                        indiceActual + 1
+                    );
 
-                audioElement.play();
+                    audioElement.play();
+
+                }
+
             }
-
-        });
+        );
 
 
         // =========================
         // BOTONES
         // =========================
 
-        const playButton =
-            document.getElementById("play");
+        document.getElementById("play")
+            .addEventListener(
+                "click",
+                () => {
 
-        const pauseButton =
-            document.getElementById("pause");
+                    audioElement.play();
 
-        const stopButton =
-            document.getElementById("stop");
-
-        const previousButton =
-            document.getElementById("previous");
-
-        const nextButton =
-            document.getElementById("next");
+                }
+            );
 
 
-        // PLAY
+        document.getElementById("pause")
+            .addEventListener(
+                "click",
+                () => {
 
-        playButton.addEventListener("click", () => {
+                    audioElement.pause();
 
-            audioElement.play();
-
-        });
-
-
-        // PAUSA
-
-        pauseButton.addEventListener("click", () => {
-
-            audioElement.pause();
-
-        });
+                }
+            );
 
 
-        // STOP
+        document.getElementById("stop")
+            .addEventListener(
+                "click",
+                () => {
 
-        stopButton.addEventListener("click", () => {
+                    audioElement.pause();
 
-            audioElement.pause();
+                    audioElement.currentTime = 0;
 
-            audioElement.currentTime = 0;
-
-        });
-
-
-        // SIGUIENTE
-
-        nextButton.addEventListener("click", () => {
-
-            if (
-                indiceActual <
-                listaCanciones.length - 1
-            ) {
-
-                cargarCancion(indiceActual + 1);
-
-                audioElement.play();
-            }
-
-        });
+                }
+            );
 
 
-        // ANTERIOR
+        document.getElementById("next")
+            .addEventListener(
+                "click",
+                () => {
 
-        previousButton.addEventListener("click", () => {
+                    if (
+                        indiceActual <
+                        listaCanciones.length - 1
+                    ) {
 
-            if (indiceActual > 0) {
+                        cargarCancion(
+                            indiceActual + 1
+                        );
 
-                cargarCancion(indiceActual - 1);
+                        audioElement.play();
 
-                audioElement.play();
-            }
+                    }
 
-        });
+                }
+            );
+
+
+        document.getElementById("previous")
+            .addEventListener(
+                "click",
+                () => {
+
+                    if (indiceActual > 0) {
+
+                        cargarCancion(
+                            indiceActual - 1
+                        );
+
+                        audioElement.play();
+
+                    }
+
+                }
+            );
 
     </script>
 
 </body>
 </html>
+```
+
