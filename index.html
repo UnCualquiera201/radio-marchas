@@ -47,6 +47,7 @@
         const cancionRef = ref(db, "canciones/marcha1");
         const cancionesRef = ref(db, "canciones");
         let listaCanciones = [];
+        let datosCanciones = {};
         let indiceActual = 0;
         function mostrarCola(canciones) {
     const cola = document.getElementById("cola");
@@ -79,6 +80,7 @@
     if (listaCanciones.length === 0) return;
 
     indiceActual = indice;
+    mostrarCola(datosCanciones);
 
     const ruta = "canciones/" + listaCanciones[indiceActual];
     const nuevaCancionRef = ref(db, ruta);
@@ -110,6 +112,7 @@
 }
 onValue(cancionesRef, (snapshot) => {
     const canciones = snapshot.val();
+    datosCanciones = canciones;
 
     if (canciones) {
         listaCanciones = Object.keys(canciones);
