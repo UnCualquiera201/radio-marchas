@@ -88,6 +88,12 @@ onValue(cancionRef, (snapshot) => {
 playButton.addEventListener("click", () => {
     audioElement.play();
 });
+// Botón Pausa
+const pauseButton = document.getElementById("pause");
+
+pauseButton.addEventListener("click", () => {
+    audioElement.pause();
+});        
     </script>
 
 </body>
