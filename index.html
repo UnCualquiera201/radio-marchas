@@ -45,7 +45,40 @@
         const cancionRef = ref(db, "canciones/marcha1");
         const cancionesRef = ref(db, "canciones");
         let listaCanciones = [];
+        let indiceActual = 0;
+        function cargarCancion(indice) {
+    if (listaCanciones.length === 0) return;
 
+    indiceActual = indice;
+
+    const ruta = "canciones/" + listaCanciones[indiceActual];
+    const nuevaCancionRef = ref(db, ruta);
+
+    onValue(nuevaCancionRef, (snapshot) => {
+        const cancion = snapshot.val();
+
+        if (!cancion) return;
+
+        document.getElementById("titulo").textContent =
+            cancion.titulo || "";
+
+        document.getElementById("compositor").textContent =
+            cancion.compositor ? "Compositor: " + cancion.compositor : "";
+
+        document.getElementById("arreglo").textContent =
+            cancion.arreglo ? "Arreglo: " + cancion.arreglo : "";
+
+        document.getElementById("rearmonizacion").textContent =
+            cancion.rearmonizacion ? "Rearmonización: " + cancion.rearmonizacion : "";
+
+        document.getElementById("interpreta").textContent =
+            cancion.interpreta ? "Interpreta: " + cancion.interpreta : "";
+
+        if (cancion.audio) {
+            audioElement.src = cancion.audio;
+        }
+    });
+}
 onValue(cancionesRef, (snapshot) => {
     const canciones = snapshot.val();
 
