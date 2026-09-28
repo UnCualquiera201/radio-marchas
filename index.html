@@ -9,7 +9,15 @@
 <body>
 
     <h1>Radio Marchas</h1>
+
     <p id="estado">Conectando con Firebase...</p>
+
+    <h2 id="titulo">Cargando canción...</h2>
+
+    <p id="compositor"></p>
+    <p id="arreglo"></p>
+    <p id="rearmonizacion"></p>
+    <p id="interpreta"></p>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
@@ -29,6 +37,7 @@
         const db = getDatabase(app);
 
         const radioRef = ref(db, "radio");
+        const cancionRef = ref(db, "canciones/marcha1");
 
         onValue(radioRef, (snapshot) => {
             const radio = snapshot.val();
@@ -36,6 +45,27 @@
             if (radio) {
                 document.getElementById("estado").textContent =
                     "Estado: " + radio.estado;
+            }
+        });
+
+        onValue(cancionRef, (snapshot) => {
+            const cancion = snapshot.val();
+
+            if (cancion) {
+                document.getElementById("titulo").textContent =
+                    cancion.titulo || "";
+
+                document.getElementById("compositor").textContent =
+                    cancion.compositor ? "Compositor: " + cancion.compositor : "";
+
+                document.getElementById("arreglo").textContent =
+                    cancion.arreglo ? "Arreglo: " + cancion.arreglo : "";
+
+                document.getElementById("rearmonizacion").textContent =
+                    cancion.rearmonizacion ? "Rearmonización: " + cancion.rearmonizacion : "";
+
+                document.getElementById("interpreta").textContent =
+                    cancion.interpreta ? "Interpreta: " + cancion.interpreta : "";
             }
         });
     </script>
