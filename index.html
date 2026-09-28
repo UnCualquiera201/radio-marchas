@@ -24,6 +24,7 @@
 <button id="previous">⏮️ Anterior</button>
     
 <audio id="audio"></audio>
+<div id="cola"></div>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
@@ -79,7 +80,6 @@
         }
     });
 }
-cargarCancion(1);
 onValue(cancionesRef, (snapshot) => {
     const canciones = snapshot.val();
 
