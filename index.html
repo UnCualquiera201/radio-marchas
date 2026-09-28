@@ -49,6 +49,19 @@
         const cancionRef = ref(db, "canciones/marcha1");
         const cancionesRef = ref(db, "canciones");
         let listaCanciones = [];
+        function actualizarFondo(cancion) {
+    const radioFondo = document.getElementById("radioFondo");
+
+    if (cancion && cancion.imagen) {
+        radioFondo.style.backgroundImage = `url("${cancion.imagen}")`;
+
+        const posicionX = cancion.posicionX !== undefined ? cancion.posicionX : 50;
+        const posicionY = cancion.posicionY !== undefined ? cancion.posicionY : 50;
+
+        radioFondo.style.backgroundPosition =
+            `${posicionX}% ${posicionY}%`;
+    }
+}
         let datosCanciones = {};
         function actualizarFondo(cancion) {
     const radioFondo = document.getElementById("radioFondo");
