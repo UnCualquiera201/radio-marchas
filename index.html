@@ -18,7 +18,9 @@
     <p id="arreglo"></p>
     <p id="rearmonizacion"></p>
     <p id="interpreta"></p>
+<button id="play">▶️ Play</button>
 
+<audio id="audio"></audio>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
@@ -68,6 +70,22 @@
                     cancion.interpreta ? "Interpreta: " + cancion.interpreta : "";
             }
         });
+        // Cargar el audio de la canción
+const audioElement = document.getElementById("audio");
+const playButton = document.getElementById("play");
+
+onValue(cancionRef, (snapshot) => {
+    const cancion = snapshot.val();
+
+    if (cancion && cancion.audio) {
+        audioElement.src = cancion.audio;
+    }
+});
+
+// Botón Play
+playButton.addEventListener("click", () => {
+    audioElement.play();
+});
     </script>
 
 </body>
