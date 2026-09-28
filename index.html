@@ -149,6 +149,14 @@ onValue(cancionesRef, (snapshot) => {
         // Cargar el audio de la canción
 const audioElement = document.getElementById("audio");
 const playButton = document.getElementById("play");
+const previousButton = document.getElementById("previous");
+
+previousButton.addEventListener("click", () => {
+    if (indiceActual > 0) {
+        cargarCancion(indiceActual - 1);
+        audioElement.play();
+    }
+});
 
 onValue(cancionRef, (snapshot) => {
     const cancion = snapshot.val();
