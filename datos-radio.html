@@ -490,12 +490,38 @@ let audioActivo = false;
 
 
 // =========================
+// BOTÓN ESCUCHAR RADIO
+// =========================
+
+const botonEscuchar =
+    document.getElementById("escucharRadio");
+
+const audioRadio =
+    new Audio();
+
+let audioActivo = false;
+
+
+// =========================
+// BOTÓN ESCUCHAR RADIO
+// CON SINCRONIZACIÓN
+// =========================
+
+const botonEscuchar =
+    document.getElementById("escucharRadio");
+
+const audioRadio =
+    new Audio();
+
+let audioActivo = false;
+
+
+// =========================
 // ESCUCHAR RADIO
 // =========================
 
-botonEscuchar.addEventListener("click", function () {
+botonEscuchar.addEventListener("click", async function () {
 
-    // Obtener la marcha que está en emisión
     const id =
         radio.cancionActual;
 
@@ -519,7 +545,7 @@ botonEscuchar.addEventListener("click", function () {
 
 
     // =========================
-    // SI ESTÁ SONANDO → PAUSAR
+    // PAUSAR
     // =========================
 
     if (audioActivo) {
@@ -536,7 +562,7 @@ botonEscuchar.addEventListener("click", function () {
 
 
     // =========================
-    // CARGAR AUDIO ACTUAL
+    // CARGAR AUDIO
     // =========================
 
     audioRadio.src =
@@ -546,30 +572,72 @@ botonEscuchar.addEventListener("click", function () {
 
 
     // =========================
-    // REPRODUCIR
+    // ESPERAR INFORMACIÓN DEL AUDIO
     // =========================
 
-    audioRadio.play()
-        .then(function () {
+    audioRadio.addEventListener(
+        "loadedmetadata",
+        function sincronizar() {
 
-            audioActivo = true;
-
-            botonEscuchar.textContent =
-                "⏸️ Pausar radio";
-
-        })
-        .catch(function (error) {
-
-            console.error(
-                "No se pudo reproducir el audio:",
-                error
+            audioRadio.removeEventListener(
+                "loadedmetadata",
+                sincronizar
             );
 
-            alert(
-                "No se pudo reproducir la radio."
-            );
 
-        });
+            // =========================
+            // SINCRONIZAR
+            // =========================
+
+            if (radio.inicioEmision) {
+
+                const ahora =
+                    Date.now();
+
+                const inicio =
+                    Number(radio.inicioEmision);
+
+                const segundos =
+                    (ahora - inicio) / 1000;
+
+
+                if (
+                    segundos >= 0 &&
+                    segundos < audioRadio.duration
+                ) {
+
+                    audioRadio.currentTime =
+                        segundos;
+
+                }
+
+            }
+
+
+            // =========================
+            // REPRODUCIR
+            // =========================
+
+            audioRadio.play()
+                .then(function () {
+
+                    audioActivo = true;
+
+                    botonEscuchar.textContent =
+                        "⏸️ Pausar radio";
+
+                })
+                .catch(function (error) {
+
+                    console.error(
+                        "No se pudo reproducir:",
+                        error
+                    );
+
+                });
+
+        }
+    );
 
 });
 
