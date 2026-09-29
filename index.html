@@ -1205,65 +1205,40 @@
                     // CORREGIDO:
                     // faltaba el ")" después de Array.isArray(ordenGuardado)
 
-                   if (
-                       Array.isArray(
-                          ordenGuardado
-                       )
-                   ) {
+                   if (Array.isArray(ordenGuardado)) {
 
-    const nuevoOrden = [];
+    let nuevoOrden = [];
 
+    ordenGuardado.forEach(function (id) {
 
-                        ordenGuardado.forEach(
-                            function (id) {
+        if (
+            canciones[id] &&
+            !nuevoOrden.includes(id)
+        ) {
 
-                                if (
-                                    canciones[id] &&
-                                    !nuevoOrden.includes(id)
-                                ) {
+            nuevoOrden.push(id);
 
-                                    nuevoOrden.push(
-                                        id
-                                    );
+        }
 
-                                }
+    });
 
-                            }
-                        );
+    Object.keys(canciones).forEach(function (id) {
 
+        if (!nuevoOrden.includes(id)) {
 
-                        Object.keys(
-                            canciones
-                        ).forEach(
-                            function (id) {
+            nuevoOrden.push(id);
 
-                                if (
-                                    !nuevoOrden.includes(
-                                        id
-                                    )
-                                ) {
+        }
 
-                                    nuevoOrden.push(
-                                        id
-                                    );
+    });
 
-                                }
+    listaCanciones = nuevoOrden;
 
-                            }
-                        );
+} else {
 
+    listaCanciones = Object.keys(canciones);
 
-                        listaCanciones =
-                            nuevoOrden;
-
-                    } else {
-
-                        listaCanciones =
-                            Object.keys(
-                                canciones
-                            );
-
-                    }
+}
 
                 } catch (error) {
 
