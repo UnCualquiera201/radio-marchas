@@ -18,55 +18,37 @@
             overflow: hidden;
         }
 
-
         #radioInfo {
-
             position: relative;
-
             width: 100%;
-
             aspect-ratio: 1908 / 412;
-
             min-height: 250px;
-
             overflow: hidden;
 
             background-size: cover;
-
             background-position: center center;
-
             background-repeat: no-repeat;
 
             display: flex;
-
             align-items: flex-end;
 
             box-sizing: border-box;
-
         }
 
-
         #filtro {
-
             position: absolute;
-
             inset: 0;
 
             background: rgba(0, 0, 0, 0.25);
 
             z-index: 1;
-
         }
 
-
         #texto {
-
             position: relative;
-
             z-index: 2;
 
             width: 100%;
-
             box-sizing: border-box;
 
             padding: 30px;
@@ -76,52 +58,38 @@
             text-shadow:
                 2px 2px 5px black,
                 -1px -1px 3px black;
-
         }
 
-
         #enEmision {
-
             font-size: 20px;
-
             font-weight: bold;
 
             margin-bottom: 10px;
-
         }
 
-
         #titulo {
-
             margin: 0 0 8px 0;
 
             font-size: clamp(24px, 3vw, 48px);
 
             font-weight: bold;
-
         }
-
 
         #compositor,
         #interpreta {
-
             margin: 4px 0;
 
             font-size: clamp(15px, 1.5vw, 24px);
 
             font-weight: 500;
-
         }
 
-
         #cargando {
-
             position: absolute;
 
             z-index: 3;
 
             top: 50%;
-
             left: 50%;
 
             transform: translate(-50%, -50%);
@@ -130,8 +98,8 @@
 
             font-size: 20px;
 
-            text-shadow: 2px 2px 4px black;
-
+            text-shadow:
+                2px 2px 4px black;
         }
 
     </style>
@@ -195,6 +163,10 @@
         from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
 
+        // =========================
+        // CONFIGURACIÓN
+        // =========================
+
         const firebaseConfig = {
 
             apiKey:
@@ -246,59 +218,57 @@
         // =========================
 
         const radioInfo =
-            document.getElementById(
-                "radioInfo"
-            );
+            document.getElementById("radioInfo");
 
 
         const titulo =
-            document.getElementById(
-                "titulo"
-            );
+            document.getElementById("titulo");
 
 
         const compositor =
-            document.getElementById(
-                "compositor"
-            );
+            document.getElementById("compositor");
 
 
         const interpreta =
-            document.getElementById(
-                "interpreta"
-            );
+            document.getElementById("interpreta");
 
 
         const cargando =
-            document.getElementById(
-                "cargando"
-            );
+            document.getElementById("cargando");
 
 
         const enEmision =
-            document.getElementById(
-                "enEmision"
-            );
+            document.getElementById("enEmision");
 
 
         // =========================
         // DATOS
         // =========================
 
-        let radio = null;
+        let radio = {};
 
-        let canciones = null;
+        let canciones = {};
+
+        let radioCargado = false;
+
+        let cancionesCargadas = false;
 
 
         // =========================
-        // ACTUALIZAR PANTALLA
+        // ACTUALIZAR
         // =========================
 
         function actualizarPantalla() {
 
 
-            // Firebase todavía está cargando
-            if (radio === null || canciones === null) {
+            // =========================
+            // ESPERAR FIREBASE
+            // =========================
+
+            if (
+                !radioCargado ||
+                !cancionesCargadas
+            ) {
 
                 radioInfo.style.display = "flex";
 
@@ -310,10 +280,28 @@
 
 
             // =========================
-            // COMPROBAR ESTADO
+            // ESTADO
             // =========================
 
-            if (radio.estado !== "playing") {
+            const estado =
+                String(radio.estado || "").trim();
+
+
+            console.log(
+                "Estado recibido:",
+                estado
+            );
+
+
+            // =========================
+            // POR AHORA:
+            // PLAYING O EN EMISIÓN
+            // =========================
+
+            if (
+                estado !== "playing" &&
+                estado !== "En emisión"
+            ) {
 
                 radioInfo.style.display = "none";
 
@@ -323,21 +311,18 @@
 
 
             // =========================
-            // MOSTRAR TODO
+            // MOSTRAR
             // =========================
 
             radioInfo.style.display = "flex";
 
 
-            // =========================
-            // MOSTRAR EN EMISIÓN
-            // =========================
-
-            enEmision.style.display = "block";
+            enEmision.style.display =
+                "block";
 
 
             // =========================
-            // CANCIÓN ACTUAL
+            // CANCIÓN
             // =========================
 
             const id =
@@ -346,16 +331,13 @@
 
             if (!id) {
 
-                cargando.style.display = "block";
+                cargando.style.display =
+                    "block";
 
                 return;
 
             }
 
-
-            // =========================
-            // BUSCAR CANCIÓN
-            // =========================
 
             const cancion =
                 canciones[id];
@@ -363,7 +345,8 @@
 
             if (!cancion) {
 
-                cargando.style.display = "block";
+                cargando.style.display =
+                    "block";
 
                 return;
 
@@ -382,34 +365,22 @@
             // COMPOSITOR
             // =========================
 
-            if (cancion.compositor) {
-
-                compositor.textContent =
-                    "Compositor: " +
-                    cancion.compositor;
-
-            } else {
-
-                compositor.textContent = "";
-
-            }
+            compositor.textContent =
+                cancion.compositor
+                    ? "Compositor: " +
+                      cancion.compositor
+                    : "";
 
 
             // =========================
             // INTERPRETA
             // =========================
 
-            if (cancion.interpreta) {
-
-                interpreta.textContent =
-                    "Interpreta: " +
-                    cancion.interpreta;
-
-            } else {
-
-                interpreta.textContent = "";
-
-            }
+            interpreta.textContent =
+                cancion.interpreta
+                    ? "Interpreta: " +
+                      cancion.interpreta
+                    : "";
 
 
             // =========================
@@ -450,7 +421,7 @@
 
 
             // =========================
-            // POSICIÓN DE IMAGEN
+            // POSICIÓN
             // =========================
 
             radioInfo.style.backgroundPosition =
@@ -458,16 +429,17 @@
 
 
             // =========================
-            // OCULTAR CARGANDO
+            // TERMINÓ CARGA
             // =========================
 
-            cargando.style.display = "none";
+            cargando.style.display =
+                "none";
 
         }
 
 
         // =========================
-        // ESCUCHAR RADIO
+        // RADIO
         // =========================
 
         onValue(
@@ -477,6 +449,8 @@
                 radio =
                     snapshot.val() || {};
 
+                radioCargado = true;
+
                 actualizarPantalla();
 
             }
@@ -484,7 +458,7 @@
 
 
         // =========================
-        // ESCUCHAR CANCIONES
+        // CANCIONES
         // =========================
 
         onValue(
@@ -493,6 +467,8 @@
 
                 canciones =
                     snapshot.val() || {};
+
+                cancionesCargadas = true;
 
                 actualizarPantalla();
 
