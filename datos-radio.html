@@ -1,16 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Radio Marchas</title>
+    <title>Datos Radio Marchas</title>
 
     <style>
-
-        * {
-            box-sizing: border-box;
-        }
 
         html,
         body {
@@ -19,27 +16,13 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-
-            font-family: Arial, Helvetica, sans-serif;
-
-            background: transparent;
         }
-
-
-        /* =========================================
-           SECCIÓN RADIO
-           PROPORCIÓN: 1908 x 412
-        ========================================= */
 
         #radioInfo {
 
             position: relative;
 
             width: 100%;
-
-            /*
-                1908 / 412 = 4.63
-            */
 
             aspect-ratio: 1908 / 412;
 
@@ -49,7 +32,7 @@
 
             background-size: cover;
 
-            background-position: center;
+            background-position: center center;
 
             background-repeat: no-repeat;
 
@@ -57,38 +40,29 @@
 
             align-items: flex-end;
 
-            transition:
-                background-image 0.5s ease;
+            box-sizing: border-box;
+
         }
 
 
-        /* =========================================
-           CAPA OSCURA
-        ========================================= */
+        /* OSCURECER UN POCO LA IMAGEN */
 
-        #oscuro {
+        #filtro {
 
             position: absolute;
 
             inset: 0;
 
-            background:
-                linear-gradient(
-                    to top,
-                    rgba(0, 0, 0, 0.85),
-                    rgba(0, 0, 0, 0.35),
-                    rgba(0, 0, 0, 0.05)
-                );
+            background: rgba(0, 0, 0, 0.25);
 
-            pointer-events: none;
+            z-index: 1;
+
         }
 
 
-        /* =========================================
-           DATOS
-        ========================================= */
+        /* TEXTO */
 
-        #datos {
+        #texto {
 
             position: relative;
 
@@ -96,276 +70,108 @@
 
             width: 100%;
 
-            padding: 35px 55px;
+            box-sizing: border-box;
+
+            padding: 30px;
 
             color: white;
 
             text-shadow:
-                0 2px 5px rgba(0, 0, 0, 0.9);
+                2px 2px 5px black,
+                -1px -1px 3px black;
+
         }
 
-
-        /* =========================================
-           ESTADO
-        ========================================= */
-
-        #estado {
-
-            display: inline-block;
-
-            padding: 6px 13px;
-
-            margin-bottom: 8px;
-
-            border-radius: 20px;
-
-            background:
-                rgba(0, 0, 0, 0.60);
-
-            color: white;
-
-            font-size: 13px;
-
-            font-weight: bold;
-        }
-
-
-        /* =========================================
-           TITULO DE LA MARCHA
-        ========================================= */
 
         #titulo {
 
-            margin: 0 0 10px 0;
+            margin: 0 0 8px 0;
 
-            color: white;
-
-            font-size: 32px;
-
-            line-height: 1.15;
+            font-size: clamp(24px, 3vw, 48px);
 
             font-weight: bold;
 
-            text-shadow:
-                0 2px 6px rgba(0, 0, 0, 1);
         }
 
 
-        /* =========================================
-           DATOS
-        ========================================= */
+        #compositor,
+        #interpreta {
 
-        .dato {
+            margin: 4px 0;
 
-            margin: 3px 0;
+            font-size: clamp(15px, 1.5vw, 24px);
+
+            font-weight: 500;
+
+        }
+
+
+        #cargando {
+
+            position: absolute;
+
+            z-index: 3;
+
+            top: 50%;
+
+            left: 50%;
+
+            transform: translate(-50%, -50%);
 
             color: white;
 
-            font-size: 17px;
+            font-size: 20px;
 
-            line-height: 1.3;
+            text-shadow: 2px 2px 4px black;
 
-            text-shadow:
-                0 2px 5px rgba(0, 0, 0, 0.9);
-        }
-
-
-        .dato strong {
-
-            font-weight: bold;
-        }
-
-
-        /* =========================================
-           TABLET
-        ========================================= */
-
-        @media (max-width: 1000px) {
-
-            #datos {
-
-                padding: 25px 35px;
-            }
-
-            #titulo {
-
-                font-size: 27px;
-            }
-
-            .dato {
-
-                font-size: 15px;
-            }
-        }
-
-
-        /* =========================================
-           CELULAR
-        ========================================= */
-
-        @media (max-width: 600px) {
-
-            #radioInfo {
-
-                min-height: 300px;
-
-                aspect-ratio: auto;
-            }
-
-            #datos {
-
-                padding: 20px;
-            }
-
-            #titulo {
-
-                font-size: 23px;
-            }
-
-            .dato {
-
-                font-size: 14px;
-            }
         }
 
     </style>
+
 </head>
 
 
 <body>
 
 
-    <!-- =========================================
-         BLOQUE RADIO
-    ========================================== -->
-
     <div id="radioInfo">
 
-
-        <!-- OSCURECIMIENTO DE LA IMAGEN -->
-
-        <div id="oscuro"></div>
+        <div id="filtro"></div>
 
 
-        <!-- =====================================
-             INFORMACIÓN
-        ====================================== -->
-
-        <div id="datos">
+        <div id="cargando">
+            Cargando...
+        </div>
 
 
-            <!-- ESTADO -->
-
-            <div id="estado">
-                Conectando...
-            </div>
-
-
-            <!-- TITULO -->
+        <div id="texto">
 
             <h1 id="titulo">
-                Cargando...
+                Radio Marchas
             </h1>
 
 
-            <!-- COMPOSITOR -->
-
-            <p
-                class="dato"
-                id="lineaCompositor"
-            >
-
-                <strong>
-                    Compositor:
-                </strong>
-
-                <span id="compositor"></span>
-
-            </p>
+            <p id="compositor"></p>
 
 
-            <!-- ADAPTACIÓN -->
-
-            <p
-                class="dato"
-                id="lineaAdaptacion"
-            >
-
-                <strong>
-                    Adaptación:
-                </strong>
-
-                <span id="adaptacion"></span>
-
-            </p>
-
-
-            <!-- ARREGLO -->
-
-            <p
-                class="dato"
-                id="lineaArreglo"
-            >
-
-                <strong>
-                    Arreglo:
-                </strong>
-
-                <span id="arreglo"></span>
-
-            </p>
-
-
-            <!-- REARMONIZACIÓN -->
-
-            <p
-                class="dato"
-                id="lineaRearmonizacion"
-            >
-
-                <strong>
-                    Rearmonización:
-                </strong>
-
-                <span id="rearmonizacion"></span>
-
-            </p>
-
-
-            <!-- INTERPRETA -->
-
-            <p
-                class="dato"
-                id="lineaInterpreta"
-            >
-
-                <strong>
-                    Interpreta:
-                </strong>
-
-                <span id="interpreta"></span>
-
-            </p>
-
+            <p id="interpreta"></p>
 
         </div>
 
     </div>
 
 
-
-    <!-- =========================================
-         FIREBASE
-    ========================================== -->
-
     <script type="module">
 
+
+        // =========================
+        // FIREBASE
+        // =========================
 
         import {
             initializeApp
         }
-        from
-        "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+        from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 
 
         import {
@@ -373,14 +179,8 @@
             ref,
             onValue
         }
-        from
-        "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+        from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
-
-
-        // =========================================
-        // CONFIGURACIÓN FIREBASE
-        // =========================================
 
         const firebaseConfig = {
 
@@ -404,13 +204,9 @@
 
             appId:
                 "1:190263587385:web:1c6a77e370c0103da913e8"
+
         };
 
-
-
-        // =========================================
-        // CONECTAR FIREBASE
-        // =========================================
 
         const app =
             initializeApp(firebaseConfig);
@@ -420,10 +216,9 @@
             getDatabase(app);
 
 
-
-        // =========================================
+        // =========================
         // REFERENCIAS
-        // =========================================
+        // =========================
 
         const radioRef =
             ref(db, "radio");
@@ -433,328 +228,185 @@
             ref(db, "canciones");
 
 
-
-        // =========================================
-        // VARIABLES
-        // =========================================
-
-        let radioData = {};
-
-        let cancionesData = {};
-
-
-
-        // =========================================
-        // ELEMENTOS
-        // =========================================
-
         const radioInfo =
-            document.getElementById("radioInfo");
-
-
-        const estado =
-            document.getElementById("estado");
+            document.getElementById(
+                "radioInfo"
+            );
 
 
         const titulo =
-            document.getElementById("titulo");
+            document.getElementById(
+                "titulo"
+            );
 
 
         const compositor =
-            document.getElementById("compositor");
-
-
-        const adaptacion =
-            document.getElementById("adaptacion");
-
-
-        const arreglo =
-            document.getElementById("arreglo");
-
-
-        const rearmonizacion =
-            document.getElementById("rearmonizacion");
+            document.getElementById(
+                "compositor"
+            );
 
 
         const interpreta =
-            document.getElementById("interpreta");
+            document.getElementById(
+                "interpreta"
+            );
 
 
-
-        const lineaCompositor =
-            document.getElementById("lineaCompositor");
-
-
-        const lineaAdaptacion =
-            document.getElementById("lineaAdaptacion");
+        const cargando =
+            document.getElementById(
+                "cargando"
+            );
 
 
-        const lineaArreglo =
-            document.getElementById("lineaArreglo");
+        // =========================
+        // DATOS
+        // =========================
+
+        let radio = {};
+
+        let canciones = {};
 
 
-        const lineaRearmonizacion =
-            document.getElementById("lineaRearmonizacion");
-
-
-        const lineaInterpreta =
-            document.getElementById("lineaInterpreta");
-
-
-
-        // =========================================
-        // MOSTRAR U OCULTAR DATO
-        // =========================================
-
-        function mostrarDato(
-            linea,
-            elemento,
-            valor
-        ) {
-
-            if (
-                valor !== undefined &&
-                valor !== null &&
-                String(valor).trim() !== ""
-            ) {
-
-                elemento.textContent =
-                    valor;
-
-                linea.style.display =
-                    "block";
-
-            }
-
-            else {
-
-                elemento.textContent =
-                    "";
-
-                linea.style.display =
-                    "none";
-            }
-
-        }
-
-
-
-        // =========================================
+        // =========================
         // ACTUALIZAR PANTALLA
-        // =========================================
+        // =========================
 
         function actualizarPantalla() {
 
 
             const id =
-                radioData.cancionActual;
+                radio.cancionActual;
 
-
-
-            // =====================================
-            // SIN MARCHA
-            // =====================================
 
             if (!id) {
 
-                titulo.textContent =
-                    "No hay una marcha seleccionada";
-
-
-                radioInfo.style.backgroundImage =
-                    "none";
-
-
-                mostrarDato(
-                    lineaCompositor,
-                    compositor,
-                    ""
-                );
-
-
-                mostrarDato(
-                    lineaAdaptacion,
-                    adaptacion,
-                    ""
-                );
-
-
-                mostrarDato(
-                    lineaArreglo,
-                    arreglo,
-                    ""
-                );
-
-
-                mostrarDato(
-                    lineaRearmonizacion,
-                    rearmonizacion,
-                    ""
-                );
-
-
-                mostrarDato(
-                    lineaInterpreta,
-                    interpreta,
-                    ""
-                );
-
-
-                estado.textContent =
-                    "⏹ SIN EMISIÓN";
-
+                cargando.style.display =
+                    "block";
 
                 return;
+
             }
 
 
-
-            // =====================================
-            // BUSCAR MARCHA
-            // =====================================
-
             const cancion =
-                cancionesData[id];
-
+                canciones[id];
 
 
             if (!cancion) {
 
-                titulo.textContent =
-                    "Marcha no encontrada";
-
                 return;
+
             }
 
 
+            // =========================
+            // TITULO
+            // =========================
 
-            // =====================================
+            titulo.textContent =
+                cancion.titulo || "";
+
+
+            // =========================
+            // COMPOSITOR
+            // =========================
+
+            if (cancion.compositor) {
+
+                compositor.textContent =
+                    "Compositor: " +
+                    cancion.compositor;
+
+            } else {
+
+                compositor.textContent =
+                    "";
+
+            }
+
+
+            // =========================
+            // INTERPRETA
+            // =========================
+
+            if (cancion.interpreta) {
+
+                interpreta.textContent =
+                    "Interpreta: " +
+                    cancion.interpreta;
+
+            } else {
+
+                interpreta.textContent =
+                    "";
+
+            }
+
+
+            // =========================
             // IMAGEN
-            // =====================================
+            // =========================
 
             if (cancion.imagen) {
 
                 radioInfo.style.backgroundImage =
                     `url("${cancion.imagen}")`;
 
-            }
-
-            else {
+            } else {
 
                 radioInfo.style.backgroundImage =
                     "none";
+
             }
 
 
+            // =========================
+            // POSICION X
+            // =========================
 
-            // =====================================
-            // TITULO
-            // =====================================
-
-            titulo.textContent =
-                cancion.titulo ||
-                "Sin título";
-
-
-
-            // =====================================
-            // INFORMACIÓN
-            // =====================================
-
-            mostrarDato(
-                lineaCompositor,
-                compositor,
-                cancion.compositor
-            );
+            const x =
+                cancion.posicionX !== undefined
+                    ? Number(cancion.posicionX)
+                    : 50;
 
 
-            mostrarDato(
-                lineaAdaptacion,
-                adaptacion,
-                cancion.adaptacion
-            );
+            // =========================
+            // POSICION Y
+            // =========================
+
+            const y =
+                cancion.posicionY !== undefined
+                    ? Number(cancion.posicionY)
+                    : 50;
 
 
-            mostrarDato(
-                lineaArreglo,
-                arreglo,
-                cancion.arreglo
-            );
+            // =========================
+            // MISMA POSICION QUE INDEX
+            // =========================
+
+            radioInfo.style.backgroundPosition =
+                `${x}% ${y}%`;
 
 
-            mostrarDato(
-                lineaRearmonizacion,
-                rearmonizacion,
-                cancion.rearmonizacion
-            );
+            // =========================
+            // OCULTAR CARGANDO
+            // =========================
 
-
-            mostrarDato(
-                lineaInterpreta,
-                interpreta,
-                cancion.interpreta
-            );
-
-
-
-            // =====================================
-            // ESTADO
-            // =====================================
-
-            const estadoActual =
-                radioData.estado ||
-                "stopped";
-
-
-
-            if (
-                estadoActual === "playing" ||
-                estadoActual === "En emisión"
-            ) {
-
-                estado.textContent =
-                    "🔴 EN EMISIÓN";
-
-                estado.style.background =
-                    "rgba(190, 0, 0, 0.75)";
-            }
-
-
-            else if (
-                estadoActual === "paused" ||
-                estadoActual === "Pausado"
-            ) {
-
-                estado.textContent =
-                    "⏸ PAUSADO";
-
-                estado.style.background =
-                    "rgba(190, 100, 0, 0.75)";
-            }
-
-
-            else {
-
-                estado.textContent =
-                    "⏹ DETENIDO";
-
-                estado.style.background =
-                    "rgba(0, 0, 0, 0.65)";
-            }
+            cargando.style.display =
+                "none";
 
         }
 
 
-
-        // =========================================
+        // =========================
         // ESCUCHAR RADIO
-        // =========================================
+        // =========================
 
         onValue(
             radioRef,
             function(snapshot) {
 
-                radioData =
+                radio =
                     snapshot.val() || {};
 
                 actualizarPantalla();
@@ -763,16 +415,15 @@
         );
 
 
-
-        // =========================================
+        // =========================
         // ESCUCHAR CANCIONES
-        // =========================================
+        // =========================
 
         onValue(
             cancionesRef,
             function(snapshot) {
 
-                cancionesData =
+                canciones =
                     snapshot.val() || {};
 
                 actualizarPantalla();
@@ -783,5 +434,7 @@
 
     </script>
 
+
 </body>
+
 </html>
