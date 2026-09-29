@@ -5,75 +5,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Radio Marchas</title>
 
     <style>
-        #radioFondo {
-            width: 100%;
-            min-height: 300px;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            padding: 30px;
-            box-sizing: border-box;
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #ffffff;
         }
 
         /* =========================
-           BOTÓN ESCUCHAR RADIO
-           ========================= */
+           RADIO
+        ========================= */
 
-        #escucharRadio {
-            padding: 14px 25px;
-            font-size: 18px;
-            font-weight: bold;
+        #radioFondo {
+            width: 100%;
+            min-height: 300px;
+
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+
+            padding: 30px;
+            box-sizing: border-box;
+
+            border-radius: 15px;
+            overflow: hidden;
+
+            transition: background-position 0.3s ease;
+        }
+
+        #radioFondo h1 {
+            margin-top: 0;
+        }
+
+        /* =========================
+           BOTONES
+        ========================= */
+
+        button {
+            padding: 10px 15px;
+            margin: 4px;
+
             cursor: pointer;
-            border: none;
-            border-radius: 10px;
-            margin: 10px 0 20px 0;
+
+            border: 1px solid #aaa;
+            border-radius: 8px;
+
+            background: #f5f5f5;
         }
 
-        #mensajeAudio {
-            font-weight: bold;
-            margin: 5px 0 15px 0;
+        button:hover {
+            background: #e5e5e5;
         }
 
-        #editor {
+        /* =========================
+           COLA
+        ========================= */
+
+        #cola {
             margin-top: 25px;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 12px;
             max-width: 600px;
         }
 
-        #editor select {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-        }
-
-        #editor button,
-        #editorOrden button {
-            padding: 10px 15px;
-            margin: 4px;
-            cursor: pointer;
-        }
-
-        .posicion {
-            margin: 10px 0;
-            font-weight: bold;
-        }
-
-        #mensajeGuardado,
-        #mensajeOrden {
+        .tarjetaCola {
+            border: 1px solid #ccc;
+            padding: 15px;
             margin-top: 10px;
-            font-weight: bold;
+            border-radius: 10px;
+            background: #fafafa;
         }
+
+        /* =========================
+           EDITOR DE ORDEN
+        ========================= */
 
         #editorOrden {
             margin-top: 25px;
+
             padding: 20px;
+
             border: 1px solid #ccc;
             border-radius: 12px;
+
             max-width: 600px;
         }
 
@@ -82,16 +99,34 @@
         }
 
         .bloqueMarcha {
+
             display: flex;
+
             align-items: center;
+
             gap: 12px;
+
             padding: 14px;
+
             margin: 8px 0;
+
             border: 1px solid #ccc;
+
             border-radius: 10px;
+
             background: #f5f5f5;
+
             cursor: grab;
+
             user-select: none;
+
+            transition:
+                opacity 0.2s,
+                transform 0.2s;
+        }
+
+        .bloqueMarcha:hover {
+            background: #eeeeee;
         }
 
         .bloqueMarcha:active {
@@ -103,79 +138,169 @@
         }
 
         .numeroMarcha {
+
             width: 32px;
             height: 32px;
+
             min-width: 32px;
+
             border-radius: 50%;
+
             background: #222;
+
             color: white;
+
             display: flex;
+
             align-items: center;
+
             justify-content: center;
+
             font-weight: bold;
         }
 
         .nombreMarcha {
+
             flex: 1;
+
             font-weight: bold;
         }
 
         .iconoArrastre {
+
             font-size: 20px;
+
             opacity: 0.6;
         }
+
+        /* =========================
+           EDITOR DE IMAGEN
+        ========================= */
+
+        #editor {
+
+            margin-top: 25px;
+
+            padding: 20px;
+
+            border: 1px solid #ccc;
+
+            border-radius: 12px;
+
+            max-width: 600px;
+        }
+
+        #editor select {
+
+            width: 100%;
+
+            padding: 10px;
+
+            margin-bottom: 15px;
+        }
+
+        .posicion {
+
+            margin: 10px 0;
+
+            font-weight: bold;
+        }
+
+        #mensajeGuardado,
+        #mensajeOrden {
+
+            margin-top: 10px;
+
+            font-weight: bold;
+        }
+
     </style>
+
 </head>
+
 
 <body>
 
-    <div id="radioFondo">
-        <h1>Radio Marchas</h1>
-    </div>
-
-    <p id="estado">Conectando con Firebase...</p>
-
-    <h2 id="titulo">Cargando canción...</h2>
-
-    <p id="compositor"></p>
-    <p id="adaptacion"></p>
-    <p id="arreglo"></p>
-    <p id="rearmonizacion"></p>
-    <p id="interpreta"></p>
 
     <!-- =========================
-         BOTÓN PRINCIPAL DE RADIO
-         ========================= -->
+         RADIO
+    ========================= -->
 
-    <button id="escucharRadio">
-        🎧 Escuchar radio
-    </button>
+    <div id="radioFondo">
 
-    <p id="mensajeAudio">
-        Pulsa el botón para comenzar a escuchar.
+        <h1>Radio Marchas</h1>
+
+    </div>
+
+
+    <p id="estado">
+        Conectando con Firebase...
     </p>
 
-    <!-- CONTROLES -->
 
-    <button id="play">▶️ Play</button>
-    <button id="pause">⏸️ Pausa</button>
-    <button id="stop">⏹️ Stop</button>
-    <button id="previous">⏮️ Anterior</button>
-    <button id="next">⏭️ Siguiente</button>
+    <h2 id="titulo">
+        Cargando canción...
+    </h2>
+
+
+    <p id="compositor"></p>
+
+    <p id="adaptacion"></p>
+
+    <p id="arreglo"></p>
+
+    <p id="rearmonizacion"></p>
+
+    <p id="interpreta"></p>
+
+
+    <!-- =========================
+         CONTROLES
+    ========================= -->
+
+    <button id="play">
+        ▶️ Play
+    </button>
+
+    <button id="pause">
+        ⏸️ Pausa
+    </button>
+
+    <button id="stop">
+        ⏹️ Stop
+    </button>
+
+    <button id="previous">
+        ⏮️ Anterior
+    </button>
+
+    <button id="next">
+        ⏭️ Siguiente
+    </button>
+
 
     <audio id="audio"></audio>
 
-    <div id="cola"></div>
 
     <!-- =========================
-         ORDEN DE LAS MARCHAS
-         ========================= -->
+         COLA
+    ========================= -->
+
+    <div id="cola"></div>
+
+
+    <!-- =========================
+         EDITOR DE ORDEN
+    ========================= -->
 
     <div id="editorOrden">
-        <h2>🎵 Orden de las marchas</h2>
+
+        <h2>
+            🎵 Orden de las marchas
+        </h2>
 
         <p>
-            Arrastra las marchas para cambiar su orden:
+            Arrastra las marchas como bloques para cambiar su orden:
         </p>
 
         <div id="listaOrden"></div>
@@ -185,30 +310,43 @@
         </button>
 
         <p id="mensajeOrden"></p>
+
     </div>
 
+
     <!-- =========================
-         EDITOR DE IMAGEN
-         ========================= -->
+         EDITOR DE POSICIÓN
+    ========================= -->
 
     <div id="editor">
 
-        <h2>🖼️ Editor de imagen</h2>
+        <h2>
+            🖼️ Editor de imagen
+        </h2>
 
         <p>
             Selecciona una marcha:
         </p>
 
         <select id="selectorCancion">
+
             <option value="">
                 Seleccionar marcha...
             </option>
+
         </select>
 
+
         <div class="posicion">
+
             Posición X:
-            <span id="valorX">50</span>%
+
+            <span id="valorX">
+                50
+            </span>%
+
         </div>
+
 
         <button id="izquierda">
             ⬅️ Izquierda
@@ -218,10 +356,17 @@
             ➡️ Derecha
         </button>
 
+
         <div class="posicion">
+
             Posición Y:
-            <span id="valorY">50</span>%
+
+            <span id="valorY">
+                50
+            </span>%
+
         </div>
+
 
         <button id="arriba">
             ⬆️ Arriba
@@ -231,22 +376,33 @@
             ⬇️ Abajo
         </button>
 
+
         <br><br>
+
 
         <button id="guardar">
             💾 Guardar posición
         </button>
+
 
         <p id="mensajeGuardado"></p>
 
     </div>
 
 
+
     <script type="module">
+
+
+        /* =====================================================
+           FIREBASE
+        ===================================================== */
 
         import {
             initializeApp
-        } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+        }
+        from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+
 
         import {
             getDatabase,
@@ -254,16 +410,14 @@
             onValue,
             update,
             get
-        } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+        }
+        from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
-
-        /* =========================
-           FIREBASE
-           ========================= */
 
         const firebaseConfig = {
 
-            apiKey: "AIzaSyBCKrD4b9-LyokfCtvxm1j18_J35O6w9AQ",
+            apiKey:
+                "AIzaSyBCKrD4b9-LyokfCtvxm1j18_J35O6w9AQ",
 
             authDomain:
                 "radio-marchas.firebaseapp.com",
@@ -282,25 +436,29 @@
 
             appId:
                 "1:190263587385:web:1c6a77e370c0103da913e8"
+
         };
 
 
         const app =
             initializeApp(firebaseConfig);
 
+
         const db =
             getDatabase(app);
 
 
-        /* =========================
+        /* =====================================================
            REFERENCIAS
-           ========================= */
+        ===================================================== */
 
         const radioRef =
             ref(db, "radio");
 
+
         const cancionActualRef =
             ref(db, "radio/cancionActual");
+
 
         const cancionesRef =
             ref(db, "canciones");
@@ -310,16 +468,15 @@
             document.getElementById("audio");
 
 
-        /* =========================
+        /* =====================================================
            VARIABLES
-           ========================= */
+        ===================================================== */
 
         let listaCanciones = [];
 
         let indiceActual = 0;
 
-        let cancionActualId =
-            "marcha1";
+        let cancionActualId = "marcha1";
 
         let datosCanciones = {};
 
@@ -332,31 +489,22 @@
         let marchaArrastrada = null;
 
 
-        /*
-         * Esta variable es MUY importante.
-         *
-         * false = el visitante todavía no pulsó
-         *         el botón de escuchar.
-         *
-         * true = el navegador ya permitió
-         *        reproducir audio mediante
-         *        interacción del usuario.
-         */
-
-        let audioDesbloqueado = false;
-
-
-        /* =========================
+        /* =====================================================
            FONDO
-           ========================= */
+        ===================================================== */
 
         function actualizarFondo(cancion) {
 
             const radioFondo =
-                document.getElementById("radioFondo");
+                document.getElementById(
+                    "radioFondo"
+                );
 
 
-            if (!cancion || !cancion.imagen) {
+            if (
+                !cancion ||
+                !cancion.imagen
+            ) {
 
                 radioFondo.style.backgroundImage =
                     "none";
@@ -383,12 +531,13 @@
 
             radioFondo.style.backgroundPosition =
                 `${x}% ${y}%`;
+
         }
 
 
-        /* =========================
-           EDITOR DE IMAGEN
-           ========================= */
+        /* =====================================================
+           CARGAR EDITOR
+        ===================================================== */
 
         function cargarEditor(id) {
 
@@ -398,16 +547,13 @@
 
             if (!cancion) {
 
-                console.log(
-                    "No se encontró la canción:",
-                    id
-                );
-
                 return;
+
             }
 
 
-            cancionEditando = id;
+            cancionEditando =
+                id;
 
 
             posicionX =
@@ -423,31 +569,43 @@
 
 
             actualizarVistaEditor();
+
         }
 
 
+        /* =====================================================
+           VISTA DEL EDITOR
+        ===================================================== */
+
         function actualizarVistaEditor() {
 
-            if (!cancionEditando)
+            if (!cancionEditando) {
                 return;
+            }
 
 
             const cancion =
-                datosCanciones[cancionEditando];
+                datosCanciones[
+                    cancionEditando
+                ];
 
 
-            if (!cancion)
+            if (!cancion) {
                 return;
+            }
 
 
             const radioFondo =
-                document.getElementById("radioFondo");
+                document.getElementById(
+                    "radioFondo"
+                );
 
 
             if (cancion.imagen) {
 
                 radioFondo.style.backgroundImage =
                     `url("${cancion.imagen}")`;
+
             }
 
 
@@ -465,8 +623,13 @@
                 "valorY"
             ).textContent =
                 posicionY;
+
         }
 
+
+        /* =====================================================
+           SELECTOR
+        ===================================================== */
 
         const selector =
             document.getElementById(
@@ -484,21 +647,22 @@
 
                 if (!id) {
 
-                    cancionEditando =
-                        "";
+                    cancionEditando = "";
 
                     return;
+
                 }
 
 
                 cargarEditor(id);
+
             }
         );
 
 
-        /* =========================
-           BOTONES DEL EDITOR
-           ========================= */
+        /* =====================================================
+           IZQUIERDA
+        ===================================================== */
 
         document.getElementById(
             "izquierda"
@@ -513,20 +677,27 @@
                     );
 
                     return;
+
                 }
 
 
                 posicionX -= 5;
 
 
-                if (posicionX < 0)
+                if (posicionX < 0) {
                     posicionX = 0;
+                }
 
 
                 actualizarVistaEditor();
+
             }
         );
 
+
+        /* =====================================================
+           DERECHA
+        ===================================================== */
 
         document.getElementById(
             "derecha"
@@ -541,20 +712,27 @@
                     );
 
                     return;
+
                 }
 
 
                 posicionX += 5;
 
 
-                if (posicionX > 100)
+                if (posicionX > 100) {
                     posicionX = 100;
+                }
 
 
                 actualizarVistaEditor();
+
             }
         );
 
+
+        /* =====================================================
+           ARRIBA
+        ===================================================== */
 
         document.getElementById(
             "arriba"
@@ -569,20 +747,27 @@
                     );
 
                     return;
+
                 }
 
 
                 posicionY -= 5;
 
 
-                if (posicionY < 0)
+                if (posicionY < 0) {
                     posicionY = 0;
+                }
 
 
                 actualizarVistaEditor();
+
             }
         );
 
+
+        /* =====================================================
+           ABAJO
+        ===================================================== */
 
         document.getElementById(
             "abajo"
@@ -597,24 +782,27 @@
                     );
 
                     return;
+
                 }
 
 
                 posicionY += 5;
 
 
-                if (posicionY > 100)
+                if (posicionY > 100) {
                     posicionY = 100;
+                }
 
 
                 actualizarVistaEditor();
+
             }
         );
 
 
-        /* =========================
+        /* =====================================================
            GUARDAR POSICIÓN
-           ========================= */
+        ===================================================== */
 
         document.getElementById(
             "guardar"
@@ -629,28 +817,30 @@
                     );
 
                     return;
+
                 }
 
 
                 try {
 
-                    const ruta =
-                        "canciones/" +
-                        cancionEditando;
-
-
                     const cancionRefEditor =
-                        ref(db, ruta);
+                        ref(
+                            db,
+                            "canciones/" +
+                            cancionEditando
+                        );
 
 
                     await update(
                         cancionRefEditor,
                         {
+
                             posicionX:
                                 posicionX,
 
                             posicionY:
                                 posicionY
+
                         }
                     );
 
@@ -685,14 +875,16 @@
                         "mensajeGuardado"
                     ).textContent =
                         "❌ No se pudo guardar. Revisa las reglas de Firebase.";
+
                 }
+
             }
         );
 
 
-        /* =========================
-           COLA
-           ========================= */
+        /* =====================================================
+           MOSTRAR COLA
+        ===================================================== */
 
         function mostrarCola(canciones) {
 
@@ -707,7 +899,9 @@
 
             for (
                 let i = indiceActual + 1;
+
                 i < listaCanciones.length;
+
                 i++
             ) {
 
@@ -719,8 +913,9 @@
                     canciones[idCancion];
 
 
-                if (!datosCancion)
+                if (!datosCancion) {
                     continue;
+                }
 
 
                 const tarjeta =
@@ -729,75 +924,85 @@
                     );
 
 
-                tarjeta.style.border =
-                    "1px solid #ccc";
+                tarjeta.className =
+                    "tarjetaCola";
 
 
-                tarjeta.style.padding =
-                    "15px";
+                let contenido =
+                    `<strong>${datosCancion.titulo || ""}</strong>`;
 
 
-                tarjeta.style.marginTop =
-                    "10px";
+                if (
+                    datosCancion.compositor
+                ) {
+
+                    contenido +=
+                        "<br>Compositor: " +
+                        datosCancion.compositor;
+
+                }
 
 
-                tarjeta.style.borderRadius =
-                    "10px";
+                if (
+                    datosCancion.adaptacion
+                ) {
+
+                    contenido +=
+                        "<br>Adaptación: " +
+                        datosCancion.adaptacion;
+
+                }
 
 
-                tarjeta.innerHTML = `
+                if (
+                    datosCancion.arreglo
+                ) {
 
-                    <strong>
-                        ${datosCancion.titulo || ""}
-                    </strong>
+                    contenido +=
+                        "<br>Arreglo: " +
+                        datosCancion.arreglo;
 
-                    ${
-                        datosCancion.compositor
-                            ? "<br>Compositor: " +
-                              datosCancion.compositor
-                            : ""
-                    }
+                }
 
-                    ${
-                        datosCancion.adaptacion
-                            ? "<br>Adaptación: " +
-                              datosCancion.adaptacion
-                            : ""
-                    }
 
-                    ${
-                        datosCancion.arreglo
-                            ? "<br>Arreglo: " +
-                              datosCancion.arreglo
-                            : ""
-                    }
+                if (
+                    datosCancion.rearmonizacion
+                ) {
 
-                    ${
-                        datosCancion.rearmonizacion
-                            ? "<br>Rearmonización: " +
-                              datosCancion.rearmonizacion
-                            : ""
-                    }
+                    contenido +=
+                        "<br>Rearmonización: " +
+                        datosCancion.rearmonizacion;
 
-                    ${
-                        datosCancion.interpreta
-                            ? "<br>Interpreta: " +
-                              datosCancion.interpreta
-                            : ""
-                    }
-                `;
+                }
+
+
+                if (
+                    datosCancion.interpreta
+                ) {
+
+                    contenido +=
+                        "<br>Interpreta: " +
+                        datosCancion.interpreta;
+
+                }
+
+
+                tarjeta.innerHTML =
+                    contenido;
 
 
                 cola.appendChild(
                     tarjeta
                 );
+
             }
+
         }
 
 
-        /* =========================
-           SISTEMA DE BLOQUES
-           ========================= */
+        /* =====================================================
+           EDITOR DE ORDEN
+        ===================================================== */
 
         function mostrarEditorOrden() {
 
@@ -811,14 +1016,18 @@
 
 
             listaCanciones.forEach(
-                function (id, indice) {
+                function (
+                    id,
+                    indice
+                ) {
 
                     const cancion =
                         datosCanciones[id];
 
 
-                    if (!cancion)
+                    if (!cancion) {
                         return;
+                    }
 
 
                     const bloque =
@@ -852,8 +1061,11 @@
                         <div class="iconoArrastre">
                             ☰
                         </div>
+
                     `;
 
+
+                    /* DRAG START */
 
                     bloque.addEventListener(
                         "dragstart",
@@ -866,9 +1078,12 @@
                             bloque.classList.add(
                                 "arrastrando"
                             );
+
                         }
                     );
 
+
+                    /* DRAG END */
 
                     bloque.addEventListener(
                         "dragend",
@@ -881,9 +1096,12 @@
 
                             marchaArrastrada =
                                 null;
+
                         }
                     );
 
+
+                    /* DRAG OVER */
 
                     bloque.addEventListener(
                         "dragover",
@@ -892,14 +1110,18 @@
                             event.preventDefault();
 
 
-                            if (!marchaArrastrada)
+                            if (
+                                !marchaArrastrada
+                            ) {
                                 return;
+                            }
 
 
                             if (
                                 marchaArrastrada === id
-                            )
+                            ) {
                                 return;
+                            }
 
 
                             const indiceOrigen =
@@ -917,8 +1139,11 @@
                             if (
                                 indiceOrigen === -1 ||
                                 indiceDestino === -1
-                            )
+                            ) {
+
                                 return;
+
+                            }
 
 
                             listaCanciones.splice(
@@ -941,6 +1166,7 @@
 
 
                             mostrarEditorOrden();
+
                         }
                     );
 
@@ -948,14 +1174,16 @@
                     contenedor.appendChild(
                         bloque
                     );
+
                 }
             );
+
         }
 
 
-        /* =========================
+        /* =====================================================
            GUARDAR ORDEN
-           ========================= */
+        ===================================================== */
 
         document.getElementById(
             "guardarOrden"
@@ -977,6 +1205,7 @@
                         "❌ No hay marchas.";
 
                     return;
+
                 }
 
 
@@ -985,8 +1214,10 @@
                     await update(
                         radioRef,
                         {
+
                             orden:
                                 listaCanciones
+
                         }
                     );
 
@@ -1016,14 +1247,16 @@
 
                     mensaje.textContent =
                         "❌ No se pudo guardar el orden.";
+
                 }
+
             }
         );
 
 
-        /* =========================
+        /* =====================================================
            CARGAR CANCIÓN
-           ========================= */
+        ===================================================== */
 
         async function cargarCancion(
             indice,
@@ -1032,15 +1265,17 @@
 
             if (
                 listaCanciones.length === 0
-            )
+            ) {
                 return;
+            }
 
 
             if (
                 indice < 0 ||
                 indice >= listaCanciones.length
-            )
+            ) {
                 return;
+            }
 
 
             indiceActual =
@@ -1062,20 +1297,22 @@
                 cancionActualId,
                 reproducir
             );
+
         }
 
 
-        /* =========================
+        /* =====================================================
            MOSTRAR CANCIÓN
-           ========================= */
+        ===================================================== */
 
         async function mostrarCancionPorId(
             id,
             reproducir = false
         ) {
 
-            if (!id)
+            if (!id) {
                 return;
+            }
 
 
             const cancionRefActual =
@@ -1097,8 +1334,9 @@
                     snapshot.val();
 
 
-                if (!cancion)
+                if (!cancion) {
                     return;
+                }
 
 
                 cancionActualId =
@@ -1111,10 +1349,13 @@
                     );
 
 
-                if (nuevoIndice !== -1) {
+                if (
+                    nuevoIndice !== -1
+                ) {
 
                     indiceActual =
                         nuevoIndice;
+
                 }
 
 
@@ -1176,32 +1417,13 @@
 
                 if (cancion.audio) {
 
-                    /*
-                     * Solo cambiamos el src.
-                     *
-                     * No intentamos reproducir
-                     * automáticamente aquí si el
-                     * usuario todavía no pulsó
-                     * "Escuchar radio".
-                     */
-
                     audioElement.src =
                         cancion.audio;
 
-                    audioElement.load();
                 }
 
 
-                /*
-                 * Si el usuario ya desbloqueó
-                 * el audio, podemos reproducir
-                 * cuando Firebase cambie de canción.
-                 */
-
-                if (
-                    reproducir &&
-                    audioDesbloqueado
-                ) {
+                if (reproducir) {
 
                     try {
 
@@ -1210,12 +1432,13 @@
                     } catch (error) {
 
                         console.log(
-                            "No se pudo reproducir:",
+                            "El navegador necesita que el visitante pulse Play:",
                             error
                         );
-                    }
-                }
 
+                    }
+
+                }
 
             } catch (error) {
 
@@ -1223,13 +1446,15 @@
                     "Error al cargar la marcha:",
                     error
                 );
+
             }
+
         }
 
 
-        /* =========================
-           CARGAR CANCIONES
-           ========================= */
+        /* =====================================================
+           CARGAR TODAS LAS CANCIONES
+        ===================================================== */
 
         onValue(
             cancionesRef,
@@ -1243,8 +1468,16 @@
                     canciones || {};
 
 
-                if (!canciones)
+                if (!canciones) {
+
+                    document.getElementById(
+                        "estado"
+                    ).textContent =
+                        "No hay canciones configuradas.";
+
                     return;
+
+                }
 
 
                 try {
@@ -1262,14 +1495,17 @@
                         ordenSnapshot.val();
 
 
-                    if (
-                       Array.isArray(
-                           ordenGuardado
-                       )
-                   ) {
+                    /* =========================
+                       ORDEN GUARDADO
+                    ========================= */
 
-                        let nuevoOrden =
-                            [];
+                    if (
+                        Array.isArray(
+                            ordenGuardado
+                        )
+                    ) {
+
+                        let nuevoOrden = [];
 
 
                         ordenGuardado.forEach(
@@ -1277,13 +1513,17 @@
 
                                 if (
                                     canciones[id] &&
-                                    !nuevoOrden.includes(id)
+                                    !nuevoOrden.includes(
+                                        id
+                                    )
                                 ) {
 
                                     nuevoOrden.push(
                                         id
                                     );
+
                                 }
+
                             }
                         );
 
@@ -1302,7 +1542,9 @@
                                     nuevoOrden.push(
                                         id
                                     );
+
                                 }
+
                             }
                         );
 
@@ -1310,13 +1552,13 @@
                         listaCanciones =
                             nuevoOrden;
 
-
                     } else {
 
                         listaCanciones =
                             Object.keys(
                                 canciones
                             );
+
                     }
 
 
@@ -1332,6 +1574,7 @@
                         Object.keys(
                             canciones
                         );
+
                 }
 
 
@@ -1348,6 +1591,10 @@
 
                 mostrarEditorOrden();
 
+
+                /* =========================
+                   SELECTOR
+                ========================= */
 
                 selector.innerHTML =
                     "";
@@ -1393,15 +1640,46 @@
                         selector.appendChild(
                             option
                         );
+
                     }
                 );
+
+
+                /* =========================
+                   ASEGURAR CANCIÓN ACTUAL
+                ========================= */
+
+                if (
+                    cancionActualId &&
+                    canciones[
+                        cancionActualId
+                    ]
+                ) {
+
+                    const indice =
+                        listaCanciones.indexOf(
+                            cancionActualId
+                        );
+
+
+                    if (
+                        indice !== -1
+                    ) {
+
+                        indiceActual =
+                            indice;
+
+                    }
+
+                }
+
             }
         );
 
 
-        /* =========================
+        /* =====================================================
            EMISIÓN CENTRAL
-           ========================= */
+        ===================================================== */
 
         onValue(
             radioRef,
@@ -1411,9 +1689,14 @@
                     snapshot.val();
 
 
-                if (!radio)
+                if (!radio) {
                     return;
+                }
 
+
+                /* =========================
+                   ESTADO
+                ========================= */
 
                 document.getElementById(
                     "estado"
@@ -1425,10 +1708,9 @@
                     );
 
 
-                /*
-                 * Si cambia la canción,
-                 * cargamos la nueva.
-                 */
+                /* =========================
+                   CAMBIAR CANCIÓN
+                ========================= */
 
                 if (
                     radio.cancionActual &&
@@ -1437,39 +1719,31 @@
                 ) {
 
                     const debeReproducir =
-                        (
-                            radio.estado ===
-                            "playing"
-                        ) ||
-                        (
-                            radio.estado ===
-                            "En emisión"
-                        );
+                        radio.estado ===
+                            "playing" ||
+
+                        radio.estado ===
+                            "En emisión";
 
 
                     await mostrarCancionPorId(
                         radio.cancionActual,
                         debeReproducir
                     );
+
                 }
 
 
-                /*
-                 * IMPORTANTE:
-                 *
-                 * Solo intentamos reproducir
-                 * automáticamente si el visitante
-                 * ya pulsó "Escuchar radio".
-                 */
+                /* =========================
+                   REPRODUCIR
+                ========================= */
 
                 if (
-                    audioDesbloqueado &&
-                    (
-                        radio.estado ===
+                    radio.estado ===
                         "playing" ||
-                        radio.estado ===
+
+                    radio.estado ===
                         "En emisión"
-                    )
                 ) {
 
                     try {
@@ -1479,39 +1753,47 @@
                     } catch (error) {
 
                         console.log(
-                            "No se pudo continuar la reproducción:",
+                            "El navegador bloqueó la reproducción automática.",
                             error
                         );
+
                     }
+
                 }
 
 
+                /* =========================
+                   DETENER
+                ========================= */
+
                 if (
                     radio.estado ===
-                    "stopped" ||
+                        "stopped" ||
+
                     radio.estado ===
-                    "detenido"
+                        "detenido"
                 ) {
 
                     audioElement.pause();
 
                     audioElement.currentTime =
                         0;
+
                 }
+
             }
         );
 
 
-        /* =========================
+        /* =====================================================
            INICIAR EMISIÓN
-           ========================= */
+        ===================================================== */
 
-        async function iniciarEmision(
-            id
-        ) {
+        async function iniciarEmision(id) {
 
-            if (!id)
+            if (!id) {
                 return;
+            }
 
 
             try {
@@ -1519,11 +1801,13 @@
                 await update(
                     radioRef,
                     {
+
                         estado:
                             "En emisión",
 
                         cancionActual:
                             id
+
                     }
                 );
 
@@ -1540,58 +1824,65 @@
                     "No se pudo iniciar la emisión:",
                     error
                 );
+
             }
+
         }
 
 
-        /* =========================
-           CARGAR CANCIÓN ACTUAL
-           ========================= */
+        /* =====================================================
+           CANCIÓN INICIAL
+        ===================================================== */
 
-        get(cancionActualRef)
-            .then(
-                function (snapshot) {
+        get(
+            cancionActualRef
+        )
+        .then(
+            function (snapshot) {
 
-                    const id =
-                        snapshot.val();
+                const id =
+                    snapshot.val();
 
 
-                    if (id) {
+                if (id) {
 
-                        mostrarCancionPorId(
-                            id,
-                            false
-                        );
-
-                    } else {
-
-                        mostrarCancionPorId(
-                            "marcha1",
-                            false
-                        );
-                    }
-                }
-            )
-            .catch(
-                function (error) {
-
-                    console.error(
-                        "No se pudo leer la emisión:",
-                        error
+                    mostrarCancionPorId(
+                        id,
+                        false
                     );
 
+                } else {
 
                     mostrarCancionPorId(
                         "marcha1",
                         false
                     );
+
                 }
-            );
+
+            }
+        )
+        .catch(
+            function (error) {
+
+                console.error(
+                    "No se pudo leer la emisión:",
+                    error
+                );
 
 
-        /* =========================
-           CUANDO TERMINA UNA MARCHA
-           ========================= */
+                mostrarCancionPorId(
+                    "marcha1",
+                    false
+                );
+
+            }
+        );
+
+
+        /* =====================================================
+           AUTO AVANCE
+        ===================================================== */
 
         audioElement.addEventListener(
             "ended",
@@ -1613,11 +1904,13 @@
                         await update(
                             radioRef,
                             {
+
                                 estado:
                                     "En emisión",
 
                                 cancionActual:
                                     siguienteId
+
                             }
                         );
 
@@ -1628,184 +1921,57 @@
                             "No se pudo cambiar la emisión:",
                             error
                         );
-                    }
 
+                    }
 
                 } else {
 
                     await update(
                         radioRef,
                         {
+
                             estado:
                                 "Fin de emisión"
+
                         }
                     );
+
                 }
+
             }
         );
 
 
-        /* =========================
-           🎧 ESCUCHAR RADIO
-           ========================= */
-
-        document.getElementById(
-            "escucharRadio"
-        ).addEventListener(
-            "click",
-            async function () {
-
-                const boton =
-                    document.getElementById(
-                        "escucharRadio"
-                    );
-
-
-                const mensaje =
-                    document.getElementById(
-                        "mensajeAudio"
-                    );
-
-
-                /*
-                 * Marcamos que el visitante
-                 * interactuó con el reproductor.
-                 *
-                 * Esto permite que después
-                 * Firebase pueda cambiar
-                 * automáticamente las canciones.
-                 */
-
-                audioDesbloqueado =
-                    true;
-
-
-                try {
-
-                    /*
-                     * Volvemos a leer la canción
-                     * que está actualmente en emisión.
-                     */
-
-                    const snapshot =
-                        await get(
-                            cancionActualRef
-                        );
-
-
-                    const idActual =
-                        snapshot.val();
-
-
-                    if (idActual) {
-
-                        await mostrarCancionPorId(
-                            idActual,
-                            false
-                        );
-                    }
-
-
-                    /*
-                     * Intentamos reproducir
-                     * después del clic.
-                     */
-
-                    await audioElement.play();
-
-
-                    boton.textContent =
-                        "⏸️ Pausar radio";
-
-
-                    mensaje.textContent =
-                        "🔊 Radio reproduciéndose";
-
-
-                } catch (error) {
-
-                    console.error(
-                        "Error al reproducir:",
-                        error
-                    );
-
-
-                    mensaje.textContent =
-                        "❌ No se pudo reproducir el audio. Revisa el enlace de la marcha.";
-
-
-                    audioDesbloqueado =
-                        false;
-                }
-            }
-        );
-
-
-        /* =========================
-           PAUSAR RADIO
-           ========================= */
-
-        document.getElementById(
-            "escucharRadio"
-        ).addEventListener(
-            "dblclick",
-            function () {
-
-                audioElement.pause();
-
-                document.getElementById(
-                    "escucharRadio"
-                ).textContent =
-                    "🎧 Escuchar radio";
-
-
-                document.getElementById(
-                    "mensajeAudio"
-                ).textContent =
-                    "⏸️ Radio pausada.";
-            }
-        );
-
-
-        /* =========================
-           PLAY NORMAL
-           ========================= */
+        /* =====================================================
+           PLAY
+        ===================================================== */
 
         document.getElementById(
             "play"
         ).addEventListener(
             "click",
-            async function () {
+            function () {
 
-                audioDesbloqueado =
-                    true;
+                audioElement
+                    .play()
+                    .catch(
+                        function (error) {
 
+                            console.log(
+                                "El navegador necesita una interacción para reproducir audio:",
+                                error
+                            );
 
-                try {
-
-                    await audioElement.play();
-
-
-                    document.getElementById(
-                        "mensajeAudio"
-                    ).textContent =
-                        "🔊 Radio reproduciéndose";
-
-
-                } catch (error) {
-
-                    console.log(
-                        "No se pudo reproducir:",
-                        error
+                        }
                     );
-                }
+
             }
         );
 
 
-        /* =========================
+        /* =====================================================
            PAUSA
-           ========================= */
+        ===================================================== */
 
         document.getElementById(
             "pause"
@@ -1815,18 +1981,13 @@
 
                 audioElement.pause();
 
-
-                document.getElementById(
-                    "mensajeAudio"
-                ).textContent =
-                    "⏸️ Radio pausada.";
             }
         );
 
 
-        /* =========================
+        /* =====================================================
            STOP
-           ========================= */
+        ===================================================== */
 
         document.getElementById(
             "stop"
@@ -1839,18 +2000,13 @@
                 audioElement.currentTime =
                     0;
 
-
-                document.getElementById(
-                    "mensajeAudio"
-                ).textContent =
-                    "⏹️ Radio detenida.";
             }
         );
 
 
-        /* =========================
+        /* =====================================================
            SIGUIENTE
-           ========================= */
+        ===================================================== */
 
         document.getElementById(
             "next"
@@ -1874,14 +2030,15 @@
                         await update(
                             radioRef,
                             {
+
                                 estado:
                                     "En emisión",
 
                                 cancionActual:
                                     siguienteId
+
                             }
                         );
-
 
                     } catch (error) {
 
@@ -1889,15 +2046,18 @@
                             "No se pudo cambiar la marcha:",
                             error
                         );
+
                     }
+
                 }
+
             }
         );
 
 
-        /* =========================
+        /* =====================================================
            ANTERIOR
-           ========================= */
+        ===================================================== */
 
         document.getElementById(
             "previous"
@@ -1920,14 +2080,15 @@
                         await update(
                             radioRef,
                             {
+
                                 estado:
                                     "En emisión",
 
                                 cancionActual:
                                     anteriorId
+
                             }
                         );
-
 
                     } catch (error) {
 
@@ -1935,8 +2096,11 @@
                             "No se pudo cambiar la marcha:",
                             error
                         );
+
                     }
+
                 }
+
             }
         );
 
