@@ -476,7 +476,102 @@
 
             }
         );
+        // =========================
+// BOTÓN ESCUCHAR RADIO
+// =========================
 
+const botonEscuchar =
+    document.getElementById("escucharRadio");
+
+const audioRadio =
+    new Audio();
+
+let audioActivo = false;
+
+
+// =========================
+// ESCUCHAR RADIO
+// =========================
+
+botonEscuchar.addEventListener("click", function () {
+
+    // Obtener la marcha que está en emisión
+    const id =
+        radio.cancionActual;
+
+    if (!id) {
+        alert("No hay ninguna marcha en emisión.");
+        return;
+    }
+
+    const cancion =
+        canciones[id];
+
+    if (!cancion) {
+        alert("No se encontró la marcha.");
+        return;
+    }
+
+    if (!cancion.audio) {
+        alert("Esta marcha no tiene audio.");
+        return;
+    }
+
+
+    // =========================
+    // SI ESTÁ SONANDO → PAUSAR
+    // =========================
+
+    if (audioActivo) {
+
+        audioRadio.pause();
+
+        audioActivo = false;
+
+        botonEscuchar.textContent =
+            "🎧 Escuchar radio";
+
+        return;
+    }
+
+
+    // =========================
+    // CARGAR AUDIO ACTUAL
+    // =========================
+
+    audioRadio.src =
+        cancion.audio;
+
+    audioRadio.load();
+
+
+    // =========================
+    // REPRODUCIR
+    // =========================
+
+    audioRadio.play()
+        .then(function () {
+
+            audioActivo = true;
+
+            botonEscuchar.textContent =
+                "⏸️ Pausar radio";
+
+        })
+        .catch(function (error) {
+
+            console.error(
+                "No se pudo reproducir el audio:",
+                error
+            );
+
+            alert(
+                "No se pudo reproducir la radio."
+            );
+
+        });
+
+});
 
     </script>
 
