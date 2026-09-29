@@ -61,6 +61,7 @@
     <h2 id="titulo">Cargando canción...</h2>
 
     <p id="compositor"></p>
+    <p id="adaptacion"></p>
     <p id="arreglo"></p>
     <p id="rearmonizacion"></p>
     <p id="interpreta"></p>
@@ -635,6 +636,13 @@
                     }
 
                     ${
+                        datosCancion.adaptacion
+                            ? "<br>Adaptación: " +
+                              datosCancion.adaptacion
+                            : ""
+                    }
+
+                    ${
                         datosCancion.arreglo
                             ? "<br>Arreglo: " +
                               datosCancion.arreglo
@@ -726,6 +734,14 @@
                               cancion.compositor
                             : "";
 
+
+                    document.getElementById(
+                        "adaptacion"
+                    ).textContent =
+                        cancion.adaptacion
+                            ? "Adaptación: " +
+                              cancion.adaptacion
+                            : "";
 
                     document.getElementById(
                         "arreglo"
@@ -921,6 +937,14 @@
                           cancion.compositor
                         : "";
 
+
+                document.getElementById(
+                    "adaptacion"
+                ).textContent =
+                    cancion.adaptacion
+                        ? "Adaptación: " +
+                          cancion.adaptacion
+                        : "";
 
                 document.getElementById(
                     "arreglo"
