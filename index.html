@@ -1327,47 +1327,83 @@
 
 
         // =========================
-        // EMISIÓN CENTRAL
+// EMISIÓN CENTRAL
+// =========================
+
+onValue(
+    radioRef,
+    async function (snapshot) {
+
+        const radio = snapshot.val();
+
+        if (!radio) {
+            return;
+        }
+
+        // Mostrar estado
+        document.getElementById("estado").textContent =
+            "Estado: " +
+            (radio.estado || "Fuera del aire");
+
+
+        // =========================
+        // CAMBIAR CANCIÓN
         // =========================
 
-        onValue(
-            radioRef,
-            async function (snapshot) {
+        if (
+            radio.cancionActual &&
+            radio.cancionActual !== cancionActualId
+        ) {
 
-                const radio =
-                    snapshot.val();
+            const debeReproducir =
+                radio.estado === "playing" ||
+                radio.estado === "En emisión";
 
+            await mostrarCancionPorId(
+                radio.cancionActual,
+                debeReproducir
+            );
 
-                if (!radio) {
-                    return;
-                }
-
-
-                document.getElementById(
-                    "estado"
-                ).textContent =
-                    "Estado: " +
-                    (
-                        radio.estado ||
-                        "Fuera del aire"
-                    );
+        }
 
 
-                if (
-                    radio.cancionActual &&
-                    radio.cancionActual !==
-                    cancionActualId
-                ) {
+        // =========================
+        // REPRODUCIR / PAUSAR
+        // =========================
 
-                    await mostrarCancionPorId(
-                        radio.cancionActual,
-                        false
-                    );
+        if (
+            radio.estado === "playing" ||
+            radio.estado === "En emisión"
+        ) {
 
-                }
+            try {
+
+                await audioElement.play();
+
+            } catch (error) {
+
+                console.log(
+                    "El navegador bloqueó la reproducción automática.",
+                    error
+                );
 
             }
-        );
+
+        }
+
+
+        if (
+            radio.estado === "stopped" ||
+            radio.estado === "detenido"
+        ) {
+
+            audioElement.pause();
+            audioElement.currentTime = 0;
+
+        }
+
+    }
+);
 
 
         // =========================
