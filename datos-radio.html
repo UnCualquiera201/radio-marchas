@@ -18,6 +18,11 @@
             overflow: hidden;
         }
 
+
+        /* =========================
+           BLOQUE PRINCIPAL
+        ========================= */
+
         #radioInfo {
 
             position: relative;
@@ -36,7 +41,7 @@
 
             background-repeat: no-repeat;
 
-            display: flex;
+            display: none;
 
             align-items: flex-end;
 
@@ -45,7 +50,9 @@
         }
 
 
-        /* OSCURECER UN POCO LA IMAGEN */
+        /* =========================
+           OSCURECER IMAGEN
+        ========================= */
 
         #filtro {
 
@@ -60,10 +67,12 @@
         }
 
 
-        /* TEXTO */
+        /* =========================
+           TEXTO
+        ========================= */
 
         #texto {
-            
+
             position: relative;
 
             z-index: 2;
@@ -83,6 +92,25 @@
         }
 
 
+        /* =========================
+           EN EMISIÓN
+        ========================= */
+
+        #enEmision {
+
+            font-size: 20px;
+
+            font-weight: bold;
+
+            margin-bottom: 10px;
+
+        }
+
+
+        /* =========================
+           TITULO
+        ========================= */
+
         #titulo {
 
             margin: 0 0 8px 0;
@@ -93,6 +121,10 @@
 
         }
 
+
+        /* =========================
+           COMPOSITOR E INTERPRETA
+        ========================= */
 
         #compositor,
         #interpreta {
@@ -105,6 +137,10 @@
 
         }
 
+
+        /* =========================
+           CARGANDO
+        ========================= */
 
         #cargando {
 
@@ -122,7 +158,8 @@
 
             font-size: 20px;
 
-            text-shadow: 2px 2px 4px black;
+            text-shadow:
+                2px 2px 4px black;
 
         }
 
@@ -134,43 +171,68 @@
 <body>
 
 
+    <!-- =========================
+         RADIO
+    ========================= -->
+
     <div id="radioInfo">
+
+
+        <!-- OSCURECIMIENTO -->
 
         <div id="filtro"></div>
 
+
+        <!-- CARGANDO -->
 
         <div id="cargando">
             Cargando...
         </div>
 
 
+        <!-- TEXTO -->
+
         <div id="texto">
 
-            
+
+            <!-- EN EMISIÓN -->
+
             <div id="enEmision">
-            🔴 EN EMISIÓN
+                🔴 EN EMISIÓN
             </div>
+
+
+            <!-- TITULO -->
 
             <h1 id="titulo">
                 Radio Marchas
             </h1>
 
 
+            <!-- COMPOSITOR -->
+
             <p id="compositor"></p>
 
 
+            <!-- INTERPRETA -->
+
             <p id="interpreta"></p>
+
 
         </div>
 
     </div>
 
 
+    <!-- =========================
+         FIREBASE
+    ========================= -->
+
     <script type="module">
 
 
         // =========================
-        // FIREBASE
+        // IMPORTAR FIREBASE
         // =========================
 
         import {
@@ -187,10 +249,14 @@
         from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
 
+        // =========================
+        // CONFIGURACIÓN FIREBASE
+        // =========================
+
         const firebaseConfig = {
 
             apiKey:
-                "AIzaSyBCKrD4b9-LyokfCtvxm1j18_J35O6w9AQ",
+                "AIzaSyBCKjD4b9-LyokfCtvxm1j18_J35O6w9AQ",
 
             authDomain:
                 "radio-marchas.firebaseapp.com",
@@ -213,6 +279,10 @@
         };
 
 
+        // =========================
+        // INICIAR FIREBASE
+        // =========================
+
         const app =
             initializeApp(firebaseConfig);
 
@@ -222,7 +292,7 @@
 
 
         // =========================
-        // REFERENCIAS
+        // REFERENCIAS FIREBASE
         // =========================
 
         const radioRef =
@@ -232,6 +302,10 @@
         const cancionesRef =
             ref(db, "canciones");
 
+
+        // =========================
+        // ELEMENTOS HTML
+        // =========================
 
         const radioInfo =
             document.getElementById(
@@ -263,6 +337,12 @@
             );
 
 
+        const enEmision =
+            document.getElementById(
+                "enEmision"
+            );
+
+
         // =========================
         // DATOS
         // =========================
@@ -279,9 +359,39 @@
         function actualizarPantalla() {
 
 
+            // =========================
+            // SOLO MOSTRAR SI ESTÁ PLAYING
+            // =========================
+
+            if (radio.estado !== "playing") {
+
+                radioInfo.style.display =
+                    "none";
+
+                return;
+
+            }
+
+
+            // =========================
+            // MOSTRAR BLOQUE
+            // =========================
+
+            radioInfo.style.display =
+                "flex";
+
+
+            // =========================
+            // ID DE LA CANCIÓN
+            // =========================
+
             const id =
                 radio.cancionActual;
 
+
+            // =========================
+            // SI NO HAY CANCIÓN
+            // =========================
 
             if (!id) {
 
@@ -293,6 +403,10 @@
             }
 
 
+            // =========================
+            // BUSCAR CANCIÓN
+            // =========================
+
             const cancion =
                 canciones[id];
 
@@ -302,6 +416,14 @@
                 return;
 
             }
+
+
+            // =========================
+            // EN EMISIÓN
+            // =========================
+
+            enEmision.style.display =
+                "block";
 
 
             // =========================
@@ -366,7 +488,7 @@
 
 
             // =========================
-            // POSICION X
+            // POSICIÓN X
             // =========================
 
             const x =
@@ -376,7 +498,7 @@
 
 
             // =========================
-            // POSICION Y
+            // POSICIÓN Y
             // =========================
 
             const y =
@@ -386,7 +508,8 @@
 
 
             // =========================
-            // MISMA POSICION QUE INDEX
+            // POSICIÓN DE LA IMAGEN
+            // IGUAL QUE EN INDEX
             // =========================
 
             radioInfo.style.backgroundPosition =
