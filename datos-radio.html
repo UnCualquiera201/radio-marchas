@@ -19,10 +19,6 @@
         }
 
 
-        /* =========================
-           BLOQUE PRINCIPAL
-        ========================= */
-
         #radioInfo {
 
             position: relative;
@@ -41,7 +37,7 @@
 
             background-repeat: no-repeat;
 
-            display: none;
+            display: flex;
 
             align-items: flex-end;
 
@@ -49,10 +45,6 @@
 
         }
 
-
-        /* =========================
-           OSCURECER IMAGEN
-        ========================= */
 
         #filtro {
 
@@ -66,10 +58,6 @@
 
         }
 
-
-        /* =========================
-           TEXTO
-        ========================= */
 
         #texto {
 
@@ -92,10 +80,6 @@
         }
 
 
-        /* =========================
-           EN EMISIÓN
-        ========================= */
-
         #enEmision {
 
             font-size: 20px;
@@ -106,10 +90,6 @@
 
         }
 
-
-        /* =========================
-           TITULO
-        ========================= */
 
         #titulo {
 
@@ -122,10 +102,6 @@
         }
 
 
-        /* =========================
-           COMPOSITOR E INTERPRETA
-        ========================= */
-
         #compositor,
         #interpreta {
 
@@ -137,10 +113,6 @@
 
         }
 
-
-        /* =========================
-           CARGANDO
-        ========================= */
 
         #cargando {
 
@@ -158,8 +130,7 @@
 
             font-size: 20px;
 
-            text-shadow:
-                2px 2px 4px black;
+            text-shadow: 2px 2px 4px black;
 
         }
 
@@ -171,68 +142,43 @@
 <body>
 
 
-    <!-- =========================
-         RADIO
-    ========================= -->
-
     <div id="radioInfo">
-
-
-        <!-- OSCURECIMIENTO -->
 
         <div id="filtro"></div>
 
-
-        <!-- CARGANDO -->
 
         <div id="cargando">
             Cargando...
         </div>
 
 
-        <!-- TEXTO -->
-
         <div id="texto">
-
-
-            <!-- EN EMISIÓN -->
 
             <div id="enEmision">
                 🔴 EN EMISIÓN
             </div>
 
 
-            <!-- TITULO -->
-
             <h1 id="titulo">
                 Radio Marchas
             </h1>
 
 
-            <!-- COMPOSITOR -->
-
             <p id="compositor"></p>
 
 
-            <!-- INTERPRETA -->
-
             <p id="interpreta"></p>
-
 
         </div>
 
     </div>
 
 
-    <!-- =========================
-         FIREBASE
-    ========================= -->
-
     <script type="module">
 
 
         // =========================
-        // IMPORTAR FIREBASE
+        // FIREBASE
         // =========================
 
         import {
@@ -248,10 +194,6 @@
         }
         from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
-
-        // =========================
-        // CONFIGURACIÓN FIREBASE
-        // =========================
 
         const firebaseConfig = {
 
@@ -279,10 +221,6 @@
         };
 
 
-        // =========================
-        // INICIAR FIREBASE
-        // =========================
-
         const app =
             initializeApp(firebaseConfig);
 
@@ -292,7 +230,7 @@
 
 
         // =========================
-        // REFERENCIAS FIREBASE
+        // REFERENCIAS
         // =========================
 
         const radioRef =
@@ -304,7 +242,7 @@
 
 
         // =========================
-        // ELEMENTOS HTML
+        // ELEMENTOS
         // =========================
 
         const radioInfo =
@@ -347,9 +285,9 @@
         // DATOS
         // =========================
 
-        let radio = {};
+        let radio = null;
 
-        let canciones = {};
+        let canciones = null;
 
 
         // =========================
@@ -359,14 +297,12 @@
         function actualizarPantalla() {
 
 
-            // =========================
-            // SOLO MOSTRAR SI ESTÁ PLAYING
-            // =========================
+            // Firebase todavía está cargando
+            if (radio === null || canciones === null) {
 
-            if (radio.estado !== "playing") {
+                radioInfo.style.display = "flex";
 
-                radioInfo.style.display =
-                    "none";
+                cargando.style.display = "block";
 
                 return;
 
@@ -374,29 +310,43 @@
 
 
             // =========================
-            // MOSTRAR BLOQUE
+            // COMPROBAR ESTADO
             // =========================
 
-            radioInfo.style.display =
-                "flex";
+            if (radio.estado !== "playing") {
+
+                radioInfo.style.display = "none";
+
+                return;
+
+            }
 
 
             // =========================
-            // ID DE LA CANCIÓN
+            // MOSTRAR TODO
+            // =========================
+
+            radioInfo.style.display = "flex";
+
+
+            // =========================
+            // MOSTRAR EN EMISIÓN
+            // =========================
+
+            enEmision.style.display = "block";
+
+
+            // =========================
+            // CANCIÓN ACTUAL
             // =========================
 
             const id =
                 radio.cancionActual;
 
 
-            // =========================
-            // SI NO HAY CANCIÓN
-            // =========================
-
             if (!id) {
 
-                cargando.style.display =
-                    "block";
+                cargando.style.display = "block";
 
                 return;
 
@@ -413,17 +363,11 @@
 
             if (!cancion) {
 
+                cargando.style.display = "block";
+
                 return;
 
             }
-
-
-            // =========================
-            // EN EMISIÓN
-            // =========================
-
-            enEmision.style.display =
-                "block";
 
 
             // =========================
@@ -446,8 +390,7 @@
 
             } else {
 
-                compositor.textContent =
-                    "";
+                compositor.textContent = "";
 
             }
 
@@ -464,8 +407,7 @@
 
             } else {
 
-                interpreta.textContent =
-                    "";
+                interpreta.textContent = "";
 
             }
 
@@ -508,8 +450,7 @@
 
 
             // =========================
-            // POSICIÓN DE LA IMAGEN
-            // IGUAL QUE EN INDEX
+            // POSICIÓN DE IMAGEN
             // =========================
 
             radioInfo.style.backgroundPosition =
@@ -520,8 +461,7 @@
             // OCULTAR CARGANDO
             // =========================
 
-            cargando.style.display =
-                "none";
+            cargando.style.display = "none";
 
         }
 
