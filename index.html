@@ -1225,7 +1225,7 @@
                         Array.isArray(
                             ordenGuardado
                         )
-                   ) {
+                    ) {
 
                         let nuevoOrden =
                             [];
@@ -1356,6 +1356,26 @@
                         );
                     }
                 );
+
+
+                // ==================================================
+                // CORREGIR ÍNDICE ACTUAL
+                // ==================================================
+
+                const indiceEncontrado =
+                    listaCanciones.indexOf(
+                        cancionActualId
+                    );
+
+
+                if (
+                    indiceEncontrado !== -1
+                ) {
+
+                    indiceActual =
+                        indiceEncontrado;
+                }
+
             }
         );
 
@@ -1385,6 +1405,30 @@
                         radio.estado ||
                         "Fuera del aire"
                     );
+
+
+                // ==================================================
+                // MANTENER ÍNDICE SINCRONIZADO
+                // ==================================================
+
+                if (
+                    radio.cancionActual
+                ) {
+
+                    const indiceRadio =
+                        listaCanciones.indexOf(
+                            radio.cancionActual
+                        );
+
+
+                    if (
+                        indiceRadio !== -1
+                    ) {
+
+                        indiceActual =
+                            indiceRadio;
+                    }
+                }
 
 
                 if (
@@ -1710,41 +1754,133 @@
                 "click",
                 async function () {
 
-                    if (
-                        indiceActual <
-                        listaCanciones.length - 1
-                    ) {
+                    // Obtener SIEMPRE la posición real
+                    // de la marcha que está actualmente seleccionada.
 
-                        const siguienteId =
-                            listaCanciones[
-                                indiceActual + 1
-                            ];
+                    let indiceReal =
+                        listaCanciones.indexOf(
+                            cancionActualId
+                        );
 
+
+                    // Si no coincide, intentar obtenerla
+                    // directamente desde Firebase.
+
+                    if (indiceReal === -1) {
 
                         try {
 
-                            await update(
-                                radioRef,
-                                {
-                                    estado:
-                                        "En emisión",
+                            const snapshot =
+                                await get(
+                                    cancionActualRef
+                                );
 
-                                    cancionActual:
-                                        siguienteId,
 
-                                    inicioEmision:
-                                        Date.now()
-                                }
-                            );
+                            const idFirebase =
+                                snapshot.val();
 
+
+                            indiceReal =
+                                listaCanciones.indexOf(
+                                    idFirebase
+                                );
+
+
+                            if (
+                                indiceReal !== -1
+                            ) {
+
+                                cancionActualId =
+                                    idFirebase;
+
+                                indiceActual =
+                                    indiceReal;
+                            }
 
                         } catch (error) {
 
                             console.error(
-                                "No se pudo cambiar la marcha:",
+                                "No se pudo comprobar la marcha actual:",
                                 error
                             );
+
+                            return;
                         }
+                    }
+
+
+                    if (
+                        indiceReal === -1
+                    ) {
+
+                        console.log(
+                            "La marcha actual no está en la lista."
+                        );
+
+                        return;
+                    }
+
+
+                    const siguienteIndice =
+                        indiceReal + 1;
+
+
+                    if (
+                        siguienteIndice >=
+                        listaCanciones.length
+                    ) {
+
+                        console.log(
+                            "Ya estás en la última marcha."
+                        );
+
+                        return;
+                    }
+
+
+                    const siguienteId =
+                        listaCanciones[
+                            siguienteIndice
+                        ];
+
+
+                    console.log(
+                        "⏭️ Siguiente:",
+                        siguienteId
+                    );
+
+
+                    indiceActual =
+                        siguienteIndice;
+
+
+                    cancionActualId =
+                        siguienteId;
+
+
+                    try {
+
+                        await update(
+                            radioRef,
+                            {
+                                estado:
+                                    "En emisión",
+
+                                cancionActual:
+                                    siguienteId,
+
+                                inicioEmision:
+                                    Date.now()
+                            }
+                        );
+
+
+                    } catch (error) {
+
+                        console.error(
+                            "No se pudo cambiar la marcha:",
+                            error
+                        );
                     }
                 }
             );
@@ -1759,40 +1895,131 @@
                 "click",
                 async function () {
 
-                    if (
-                        indiceActual > 0
-                    ) {
+                    // Obtener SIEMPRE la posición real
+                    // de la marcha que está actualmente seleccionada.
 
-                        const anteriorId =
-                            listaCanciones[
-                                indiceActual - 1
-                            ];
+                    let indiceReal =
+                        listaCanciones.indexOf(
+                            cancionActualId
+                        );
 
+
+                    // Si no coincide, comprobar Firebase.
+
+                    if (indiceReal === -1) {
 
                         try {
 
-                            await update(
-                                radioRef,
-                                {
-                                    estado:
-                                        "En emisión",
+                            const snapshot =
+                                await get(
+                                    cancionActualRef
+                                );
 
-                                    cancionActual:
-                                        anteriorId,
 
-                                    inicioEmision:
-                                        Date.now()
-                                }
-                            );
+                            const idFirebase =
+                                snapshot.val();
 
+
+                            indiceReal =
+                                listaCanciones.indexOf(
+                                    idFirebase
+                                );
+
+
+                            if (
+                                indiceReal !== -1
+                            ) {
+
+                                cancionActualId =
+                                    idFirebase;
+
+                                indiceActual =
+                                    indiceReal;
+                            }
 
                         } catch (error) {
 
                             console.error(
-                                "No se pudo cambiar la marcha:",
+                                "No se pudo comprobar la marcha actual:",
                                 error
                             );
+
+                            return;
                         }
+                    }
+
+
+                    if (
+                        indiceReal === -1
+                    ) {
+
+                        console.log(
+                            "La marcha actual no está en la lista."
+                        );
+
+                        return;
+                    }
+
+
+                    const anteriorIndice =
+                        indiceReal - 1;
+
+
+                    if (
+                        anteriorIndice < 0
+                    ) {
+
+                        console.log(
+                            "Ya estás en la primera marcha."
+                        );
+
+                        return;
+                    }
+
+
+                    const anteriorId =
+                        listaCanciones[
+                            anteriorIndice
+                        ];
+
+
+                    console.log(
+                        "⏮️ Anterior:",
+                        anteriorId
+                    );
+
+
+                    indiceActual =
+                        anteriorIndice;
+
+
+                    cancionActualId =
+                        anteriorId;
+
+
+                    try {
+
+                        await update(
+                            radioRef,
+                            {
+                                estado:
+                                    "En emisión",
+
+                                cancionActual:
+                                    anteriorId,
+
+                                inicioEmision:
+                                    Date.now()
+                            }
+                        );
+
+
+                    } catch (error) {
+
+                        console.error(
+                            "No se pudo cambiar la marcha:",
+                            error
+                        );
                     }
                 }
             );
