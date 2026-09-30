@@ -301,33 +301,6 @@
 
 
         // =========================
-        // PRECARGAR IMÁGENES
-        // =========================
-
-        function precargarImagenes() {
-
-            Object.values(canciones).forEach(
-                function(cancion) {
-
-                    if (
-                        cancion &&
-                        cancion.imagen
-                    ) {
-
-                        const imagen =
-                            new Image();
-
-                        imagen.src =
-                            cancion.imagen;
-                    }
-
-                }
-            );
-
-        }
-
-
-        // =========================
         // ACTUALIZAR PANTALLA
         // =========================
 
@@ -967,13 +940,6 @@
 
                 cancionesCargadas =
                     true;
-
-
-                // =========================
-                // PRECARGAR IMÁGENES
-                // =========================
-
-                precargarImagenes();
 
 
                 actualizarPantalla();
