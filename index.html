@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="es">
 
@@ -825,8 +826,6 @@
                     `;
 
 
-                    // DRAG START
-
                     bloque.addEventListener(
                         "dragstart",
                         function () {
@@ -842,8 +841,6 @@
                     );
 
 
-                    // DRAG END
-
                     bloque.addEventListener(
                         "dragend",
                         function () {
@@ -858,8 +855,6 @@
                         }
                     );
 
-
-                    // DRAG OVER
 
                     bloque.addEventListener(
                         "dragover",
@@ -1611,16 +1606,6 @@
                     }
 
 
-                    /*
-                     * Si el audio está, por ejemplo,
-                     * en el segundo 35 y pulsamos Play,
-                     * Firebase guardará un inicio
-                     * equivalente a 35 segundos atrás.
-                     *
-                     * Así la página pública podrá
-                     * continuar desde el mismo punto.
-                     */
-
                     const posicionActual =
                         Number(
                             audioElement.currentTime
@@ -1812,9 +1797,9 @@
                 }
             );
 
-
     </script>
 
 </body>
 
 </html>
+```
