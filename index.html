@@ -300,17 +300,27 @@ let ordenGuardado = [];
 let posicionX = 50;
 let posicionY = 50;
 
+
 /*
  * Número de operación de audio.
- *
- * Cada vez que comenzamos una nueva reproducción
- * aumenta este número.
- *
- * Si una operación antigua intenta continuar,
- * se cancela.
  */
 
 let operacionAudio = 0;
+
+
+/*
+ * Posición donde quedó pausada la marcha.
+ */
+
+let posicionPausada = 0;
+
+
+/*
+ * Indica si actualmente estamos reanudando
+ * una marcha que fue pausada.
+ */
+
+let audioPausado = false;
 
 
 /* =========================================================
@@ -389,6 +399,7 @@ async function cargarDatosCancion(id) {
             );
 
             return;
+
         }
 
         const cancion =
@@ -468,6 +479,7 @@ async function cargarDatosCancion(id) {
         );
 
     }
+
 }
 
 
@@ -492,10 +504,6 @@ async function reproducirAudio(id, sincronizar = false) {
     }
 
 
-    /*
-     * Crear nueva operación.
-     */
-
     operacionAudio++;
 
     const miOperacion =
@@ -508,22 +516,12 @@ async function reproducirAudio(id, sincronizar = false) {
     );
 
 
-    /*
-     * Detener completamente la reproducción
-     * anterior.
-     */
-
     audioElement.pause();
 
     audioElement.removeAttribute("src");
 
     audioElement.load();
 
-
-    /*
-     * Esperar un pequeño instante para evitar
-     * que la operación anterior interfiera.
-     */
 
     await new Promise(function(resolve) {
 
@@ -535,11 +533,6 @@ async function reproducirAudio(id, sincronizar = false) {
     });
 
 
-    /*
-     * Comprobar si esta operación todavía
-     * es válida.
-     */
-
     if (
         miOperacion !== operacionAudio
     ) {
@@ -549,20 +542,11 @@ async function reproducirAudio(id, sincronizar = false) {
     }
 
 
-    /*
-     * Cargar nuevo audio.
-     */
-
     audioElement.src =
         cancion.audio;
 
     audioElement.load();
 
-
-    /*
-     * Esperar a que el audio tenga datos
-     * suficientes para comenzar.
-     */
 
     await new Promise(function(resolve, reject) {
 
@@ -648,11 +632,6 @@ async function reproducirAudio(id, sincronizar = false) {
     });
 
 
-    /*
-     * La operación pudo haber sido cancelada
-     * mientras cargaba.
-     */
-
     if (
         miOperacion !== operacionAudio
     ) {
@@ -661,15 +640,6 @@ async function reproducirAudio(id, sincronizar = false) {
 
     }
 
-
-    /*
-     * Si estamos reproduciendo manualmente
-     * la marcha actual, podemos sincronizarla
-     * con inicioEmision.
-     *
-     * Para Siguiente/Anterior/fin de marcha
-     * se empieza desde 0.
-     */
 
     if (
         sincronizar &&
@@ -685,10 +655,6 @@ async function reproducirAudio(id, sincronizar = false) {
                 1000
             );
 
-
-        /*
-         * No pasar del final.
-         */
 
         if (
             Number.isFinite(
@@ -711,10 +677,6 @@ async function reproducirAudio(id, sincronizar = false) {
     }
 
 
-    /*
-     * Reproducir.
-     */
-
     try {
 
         await audioElement.play();
@@ -736,12 +698,6 @@ async function reproducirAudio(id, sincronizar = false) {
         );
 
     } catch (error) {
-
-        /*
-         * Si otra operación ya reemplazó
-         * esta reproducción, no mostrarlo
-         * como error importante.
-         */
 
         if (
             miOperacion !== operacionAudio
@@ -929,14 +885,7 @@ onValue(
 
 
         /*
-         * IMPORTANTE:
-         *
-         * Aquí YA NO reproducimos audio.
-         *
-         * Solo actualizamos los datos visuales.
-         *
-         * Esto evita que Firebase y los botones
-         * intenten cambiar el audio al mismo tiempo.
+         * Aquí NO reproducimos audio.
          */
 
         if (
@@ -1082,9 +1031,7 @@ document
         async function() {
 
             if (!cancionActualId) {
-
                 return;
-
             }
 
 
@@ -1108,21 +1055,114 @@ document
             }
 
 
-            const posicionActual =
-                Number(
-                    audioElement.currentTime
-                ) || 0;
+            /*
+             * SI ESTABA PAUSADA:
+             *
+             * NO llamamos reproducirAudio().
+             *
+             * Simplemente continuamos desde
+             * la posición guardada.
+             */
+
+            if (
+                audioPausado &&
+                posicionPausada > 0
+            ) {
+
+                try {
+
+                    operacionAudio++;
+
+                    const miOperacion =
+                        operacionAudio;
 
 
-            const nuevoInicio =
-                Date.now() -
-                (
-                    posicionActual *
-                    1000
-                );
+                    audioElement.currentTime =
+                        posicionPausada;
 
+
+                    /*
+                     * Actualizar inicioEmision para
+                     * que la posición también quede
+                     * correctamente sincronizada.
+                     */
+
+                    await update(
+                        radioRef,
+                        {
+                            estado:
+                                "En emisión",
+
+                            cancionActual:
+                                cancionActualId,
+
+                            inicioEmision:
+                                Date.now() -
+                                (
+                                    posicionPausada *
+                                    1000
+                                )
+                        }
+                    );
+
+
+                    await audioElement.play();
+
+
+                    if (
+                        miOperacion !==
+                        operacionAudio
+                    ) {
+
+                        audioElement.pause();
+
+                        return;
+
+                    }
+
+
+                    console.log(
+                        "▶️ CONTINUANDO DESDE:",
+                        posicionPausada
+                    );
+
+
+                    audioPausado =
+                        false;
+
+                    posicionPausada =
+                        0;
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Error al continuar:",
+                        error
+                    );
+
+                }
+
+                return;
+
+            }
+
+
+            /*
+             * REPRODUCCIÓN NORMAL.
+             *
+             * Aquí sí usamos reproducirAudio()
+             * porque es una marcha nueva.
+             */
 
             try {
+
+                posicionPausada =
+                    0;
+
+                audioPausado =
+                    false;
+
 
                 await update(
                     radioRef,
@@ -1134,15 +1174,10 @@ document
                             cancionActualId,
 
                         inicioEmision:
-                            nuevoInicio
+                            Date.now()
                     }
                 );
 
-
-                /*
-                 * El audio se reproduce SOLO
-                 * desde aquí.
-                 */
 
                 await reproducirAudio(
                     cancionActualId,
@@ -1173,9 +1208,30 @@ document
         "click",
         async function() {
 
+            /*
+             * Guardar exactamente dónde quedó.
+             */
+
+            posicionPausada =
+                Number(
+                    audioElement.currentTime
+                ) || 0;
+
+
+            audioPausado =
+                true;
+
+
             operacionAudio++;
 
             audioElement.pause();
+
+
+            console.log(
+                "⏸️ PAUSADO EN:",
+                posicionPausada
+            );
+
 
             try {
 
@@ -1215,6 +1271,17 @@ document
 
             audioElement.currentTime =
                 0;
+
+
+            /*
+             * Detener elimina la posición guardada.
+             */
+
+            posicionPausada =
+                0;
+
+            audioPausado =
+                false;
 
 
             try {
@@ -1360,18 +1427,20 @@ document
             try {
 
                 /*
-                 * Cancelar cualquier reproducción
-                 * anterior antes de cambiar.
+                 * La nueva marcha empieza desde 0.
                  */
+
+                posicionPausada =
+                    0;
+
+                audioPausado =
+                    false;
+
 
                 operacionAudio++;
 
                 audioElement.pause();
 
-
-                /*
-                 * Actualizar Firebase.
-                 */
 
                 await update(
                     radioRef,
@@ -1388,10 +1457,6 @@ document
                 );
 
 
-                /*
-                 * Actualizar variables locales.
-                 */
-
                 cancionActualId =
                     siguienteId;
 
@@ -1399,18 +1464,10 @@ document
                     indiceReal + 1;
 
 
-                /*
-                 * Cargar datos visuales.
-                 */
-
                 await cargarDatosCancion(
                     siguienteId
                 );
 
-
-                /*
-                 * REPRODUCIR DESDE 0:00.
-                 */
 
                 await reproducirAudio(
                     siguienteId,
@@ -1546,17 +1603,20 @@ document
             try {
 
                 /*
-                 * Cancelar audio anterior.
+                 * La nueva marcha empieza desde 0.
                  */
+
+                posicionPausada =
+                    0;
+
+                audioPausado =
+                    false;
+
 
                 operacionAudio++;
 
                 audioElement.pause();
 
-
-                /*
-                 * Actualizar Firebase.
-                 */
 
                 await update(
                     radioRef,
@@ -1580,18 +1640,10 @@ document
                     indiceReal - 1;
 
 
-                /*
-                 * Cargar datos visuales.
-                 */
-
                 await cargarDatosCancion(
                     anteriorId
                 );
 
-
-                /*
-                 * Reproducir desde 0:00.
-                 */
 
                 await reproducirAudio(
                     anteriorId,
@@ -1626,6 +1678,17 @@ audioElement.addEventListener(
         );
 
 
+        /*
+         * Ya no existe una posición pausada.
+         */
+
+        posicionPausada =
+            0;
+
+        audioPausado =
+            false;
+
+
         const indice =
             listaCanciones.indexOf(
                 cancionActualId
@@ -1652,10 +1715,6 @@ audioElement.addEventListener(
 
             try {
 
-                /*
-                 * Actualizar Firebase.
-                 */
-
                 await update(
                     radioRef,
                     {
@@ -1671,10 +1730,6 @@ audioElement.addEventListener(
                 );
 
 
-                /*
-                 * Actualizar variables locales.
-                 */
-
                 cancionActualId =
                     siguienteId;
 
@@ -1682,19 +1737,13 @@ audioElement.addEventListener(
                     indice + 1;
 
 
-                /*
-                 * Mostrar nueva marcha.
-                 */
-
                 await cargarDatosCancion(
                     siguienteId
                 );
 
 
                 /*
-                 * IMPORTANTE:
-                 *
-                 * La nueva marcha empieza
+                 * La nueva marcha comienza
                  * desde 0:00.
                  */
 
@@ -1714,10 +1763,6 @@ audioElement.addEventListener(
             }
 
         } else {
-
-            /*
-             * Se acabaron las marchas.
-             */
 
             try {
 
@@ -1759,9 +1804,7 @@ function actualizarEditorOrden() {
                 canciones[id];
 
             if (!cancion) {
-
                 return;
-
             }
 
 
@@ -1949,9 +1992,7 @@ selectorCancion.addEventListener(
 
 
         if (!id) {
-
             return;
-
         }
 
 
@@ -1960,9 +2001,7 @@ selectorCancion.addEventListener(
 
 
         if (!cancion) {
-
             return;
-
         }
 
 
