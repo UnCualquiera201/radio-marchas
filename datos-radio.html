@@ -6,108 +6,95 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Radio Marchas</title>
+    <title>Datos Radio Marchas</title>
 
     <style>
-        * {
-            box-sizing: border-box;
-        }
 
+        html,
         body {
             margin: 0;
             padding: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            background: #000;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
         }
 
         #radioInfo {
-            width: 100%;
-            min-height: 300px;
-            aspect-ratio: 1908 / 412;
-
-            background-color: #111;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-
             position: relative;
+            width: 100%;
+            aspect-ratio: 1908 / 412;
+            min-height: 250px;
             overflow: hidden;
 
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+
             display: flex;
-            align-items: center;
-            justify-content: center;
+            align-items: flex-end;
+
+            box-sizing: border-box;
         }
 
         #filtro {
             position: absolute;
             inset: 0;
 
-            background: rgba(0, 0, 0, 0.35);
+            background: rgba(0, 0, 0, 0.25);
 
             z-index: 1;
         }
 
         #texto {
             position: relative;
-
             z-index: 2;
 
             width: 100%;
+            box-sizing: border-box;
+
             padding: 30px;
 
-            text-align: center;
-
             color: white;
 
             text-shadow:
-                0 2px 4px black,
-                0 2px 10px black;
-        }
-
-        #cargando {
-            position: relative;
-            z-index: 3;
-
-            color: white;
-
-            font-size: 28px;
-            font-weight: bold;
-
-            text-shadow:
-                0 2px 5px black;
+                2px 2px 5px black,
+                -1px -1px 3px black;
         }
 
         #enEmision {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: bold;
 
             margin-bottom: 10px;
         }
 
         #titulo {
-            margin: 5px 0;
+            margin: 0 0 8px 0;
 
-            font-size: 38px;
+            font-size: clamp(24px, 3vw, 48px);
+
             font-weight: bold;
         }
 
         #compositor,
         #interpreta {
-            margin: 5px 0;
+            margin: 4px 0;
 
-            font-size: 18px;
+            font-size: clamp(15px, 1.5vw, 24px);
+
+            font-weight: 500;
         }
 
         #escucharRadio {
-            margin-top: 20px;
+            margin-top: 15px;
 
-            padding: 12px 25px;
+            padding: 12px 20px;
 
             border: none;
             border-radius: 8px;
 
-            background: #ffffff;
-            color: #000000;
+            background: white;
+            color: black;
 
             font-size: 16px;
             font-weight: bold;
@@ -116,44 +103,44 @@
         }
 
         #escucharRadio:hover {
-            transform: scale(1.03);
+            opacity: 0.9;
         }
 
-        @media (max-width: 700px) {
+        #cargando {
+            position: absolute;
 
-            #radioInfo {
-                min-height: 250px;
-            }
+            z-index: 3;
 
-            #titulo {
-                font-size: 25px;
-            }
+            top: 50%;
+            left: 50%;
 
-            #compositor,
-            #interpreta {
-                font-size: 15px;
-            }
+            transform: translate(-50%, -50%);
 
-            #enEmision {
-                font-size: 15px;
-            }
+            color: white;
 
-            #cargando {
-                font-size: 22px;
-            }
+            font-size: 20px;
+
+            text-shadow:
+                2px 2px 4px black;
         }
+
     </style>
+
 </head>
 
+
 <body>
+
 
     <div id="radioInfo">
 
         <div id="filtro"></div>
 
+
         <div id="cargando">
             Cargando...
         </div>
+
 
         <div id="texto">
 
@@ -161,13 +148,17 @@
                 🔴 EN EMISIÓN
             </div>
 
+
             <h1 id="titulo">
                 Radio Marchas
             </h1>
 
+
             <p id="compositor"></p>
 
+
             <p id="interpreta"></p>
+
 
             <button id="escucharRadio">
                 🎧 Escuchar radio
@@ -180,20 +171,28 @@
 
     <script type="module">
 
+
+        // =========================
+        // FIREBASE
+        // =========================
+
         import {
             initializeApp
-        } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+        }
+        from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+
 
         import {
             getDatabase,
             ref,
             onValue
-        } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+        }
+        from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
 
-        // =====================================================
-        // FIREBASE
-        // =====================================================
+        // =========================
+        // CONFIGURACIÓN
+        // =========================
 
         const firebaseConfig = {
 
@@ -217,60 +216,69 @@
 
             appId:
                 "1:190263587385:web:1c6a77e370c0103da913e8"
+
         };
 
 
-        const app = initializeApp(firebaseConfig);
+        const app =
+            initializeApp(firebaseConfig);
 
-        const db = getDatabase(app);
+
+        const db =
+            getDatabase(app);
 
 
-        // =====================================================
+        // =========================
         // REFERENCIAS
-        // =====================================================
+        // =========================
 
-        const radioRef = ref(db, "radio");
+        const radioRef =
+            ref(db, "radio");
 
-        const cancionesRef = ref(db, "canciones");
+
+        const cancionesRef =
+            ref(db, "canciones");
 
 
-        // =====================================================
+        // =========================
         // ELEMENTOS
-        // =====================================================
+        // =========================
 
         const radioInfo =
             document.getElementById("radioInfo");
 
-        const cargando =
-            document.getElementById("cargando");
-
-        const texto =
-            document.getElementById("texto");
-
-        const enEmision =
-            document.getElementById("enEmision");
 
         const titulo =
             document.getElementById("titulo");
 
+
         const compositor =
             document.getElementById("compositor");
 
+
         const interpreta =
             document.getElementById("interpreta");
+
+
+        const cargando =
+            document.getElementById("cargando");
+
+
+        const enEmision =
+            document.getElementById("enEmision");
+
 
         const botonEscuchar =
             document.getElementById("escucharRadio");
 
 
-        // =====================================================
+        // =========================
         // AUDIO
-        // =====================================================
+        // =========================
 
         const audioRadio =
             new Audio();
 
-        audioRadio.preload = "auto";
 
         let audioActivo = false;
 
@@ -279,9 +287,9 @@
         let cargandoAudio = false;
 
 
-        // =====================================================
+        // =========================
         // DATOS
-        // =====================================================
+        // =========================
 
         let radio = {};
 
@@ -292,34 +300,54 @@
         let cancionesCargadas = false;
 
 
-        // =====================================================
+        // =========================
         // ACTUALIZAR PANTALLA
-        // =====================================================
+        // =========================
 
         function actualizarPantalla() {
 
-            // Todavía estamos esperando Firebase
-            if (!radioCargado || !cancionesCargadas) {
+            // Firebase todavía está cargando
+            if (
+                !radioCargado ||
+                !cancionesCargadas
+            ) {
 
-                cargando.style.display = "block";
+                radioInfo.style.display =
+                    "flex";
 
-                texto.style.display = "none";
+                cargando.style.display =
+                    "block";
 
                 return;
             }
 
 
-            // Firebase ya cargó
-            cargando.style.display = "none";
-
-            texto.style.display = "block";
-
-
-            const id = radio.cancionActual;
+            const estado =
+                String(
+                    radio.estado || ""
+                ).trim();
 
 
-            // No hay canción actual
-            if (!id || !canciones[id]) {
+            console.log(
+                "Estado recibido:",
+                estado
+            );
+
+
+            // Si no hay emisión activa
+            if (
+                estado !== "playing" &&
+                estado !== "En emisión"
+            ) {
+
+                radioInfo.style.display =
+                    "flex";
+
+                cargando.style.display =
+                    "none";
+
+                enEmision.textContent =
+                    "⏸️ EN PAUSA";
 
                 titulo.textContent =
                     "Radio Marchas";
@@ -330,8 +358,39 @@
                 interpreta.textContent =
                     "";
 
+                return;
+            }
+
+
+            radioInfo.style.display =
+                "flex";
+
+
+            enEmision.style.display =
+                "block";
+
+
+            const id =
+                radio.cancionActual;
+
+
+            // No hay canción seleccionada todavía
+            if (!id) {
+
+                cargando.style.display =
+                    "none";
+
                 enEmision.textContent =
-                    "🔴 EN ESPERA";
+                    "🔴 EN EMISIÓN";
+
+                titulo.textContent =
+                    "Radio Marchas";
+
+                compositor.textContent =
+                    "";
+
+                interpreta.textContent =
+                    "";
 
                 return;
             }
@@ -341,201 +400,363 @@
                 canciones[id];
 
 
-            // TÍTULO
+            // La canción todavía no apareció
+            // en el objeto recibido
+            if (!cancion) {
 
-            titulo.textContent =
-                cancion.titulo || "Sin título";
+                console.log(
+                    "Esperando datos de la canción:",
+                    id
+                );
 
+                cargando.style.display =
+                    "none";
 
-            // COMPOSITOR
+                titulo.textContent =
+                    "Radio Marchas";
 
-            compositor.textContent =
-                cancion.compositor
-                    ? "Compositor: " + cancion.compositor
-                    : "";
+                compositor.textContent =
+                    "";
 
+                interpreta.textContent =
+                    "";
 
-            // INTÉRPRETE
-
-            interpreta.textContent =
-                cancion.interpreta
-                    ? "Interpreta: " + cancion.interpreta
-                    : "";
-
-
-            // ESTADO
-
-            if (
-                radio.estado === "playing" ||
-                radio.estado === "En emisión"
-            ) {
-
-                enEmision.textContent =
-                    "🔴 EN EMISIÓN";
-
-            } else {
-
-                enEmision.textContent =
-                    "⏸️ EN PAUSA";
+                return;
             }
 
 
+            // =========================
+            // DATOS DE LA MARCHA
+            // =========================
+
+            titulo.textContent =
+                cancion.titulo || "";
+
+
+            compositor.textContent =
+                cancion.compositor
+                    ? "Compositor: " +
+                      cancion.compositor
+                    : "";
+
+
+            interpreta.textContent =
+                cancion.interpreta
+                    ? "Interpreta: " +
+                      cancion.interpreta
+                    : "";
+
+
+            // =========================
             // IMAGEN
+            // =========================
 
             if (cancion.imagen) {
 
                 radioInfo.style.backgroundImage =
                     `url("${cancion.imagen}")`;
+
+            } else {
+
+                radioInfo.style.backgroundImage =
+                    "none";
             }
 
 
-            // POSICIÓN X
+            // =========================
+            // POSICIÓN DE IMAGEN
+            // =========================
 
-            if (cancion.posicionX !== undefined) {
+            const x =
+                cancion.posicionX !== undefined
+                    ? Number(cancion.posicionX)
+                    : 50;
 
-                radioInfo.style.backgroundPositionX =
-                    cancion.posicionX + "%";
-            }
+
+            const y =
+                cancion.posicionY !== undefined
+                    ? Number(cancion.posicionY)
+                    : 50;
 
 
-            // POSICIÓN Y
+            radioInfo.style.backgroundPosition =
+                `${x}% ${y}%`;
 
-            if (cancion.posicionY !== undefined) {
 
-                radioInfo.style.backgroundPositionY =
-                    cancion.posicionY + "%";
-            }
+            // =========================
+            // OCULTAR CARGANDO
+            // =========================
+
+            cargando.style.display =
+                "none";
         }
 
 
-        // =====================================================
-        // REPRODUCCIÓN SINCRONIZADA
-        // =====================================================
+        // =========================
+        // REPRODUCIR SINCRONIZADO
+        // =========================
 
-        function reproducirSincronizado(id) {
+        function reproducirSincronizado() {
+
+            const id =
+                radio.cancionActual;
+
+
+            if (!id) {
+                return;
+            }
+
+
+            const cancion =
+                canciones[id];
+
+
+            if (!cancion) {
+                return;
+            }
+
+
+            if (!cancion.audio) {
+                return;
+            }
+
+
+            const inicio =
+                Number(
+                    radio.inicioEmision
+                );
+
+
+            if (
+                !Number.isFinite(inicio) ||
+                inicio <= 0
+            ) {
+
+                console.log(
+                    "La emisión no tiene un inicioEmision válido."
+                );
+
+                return;
+            }
+
 
             if (cargandoAudio) {
                 return;
             }
 
 
-            const cancion =
-                canciones[id];
+            cargandoAudio =
+                true;
 
 
-            if (!cancion || !cancion.audio) {
-                return;
-            }
+            idAudioActual =
+                id;
 
 
-            const inicio =
-                Number(radio.inicioEmision);
+            const cuandoCargue =
+                function () {
+
+                    audioRadio.removeEventListener(
+                        "loadedmetadata",
+                        cuandoCargue
+                    );
 
 
-            if (!Number.isFinite(inicio)) {
-                return;
-            }
+                    cargandoAudio =
+                        false;
 
 
-            cargandoAudio = true;
-
-
-            const cuandoCargue = function () {
-
-                audioRadio.removeEventListener(
-                    "loadedmetadata",
-                    cuandoCargue
-                );
-
-
-                cargandoAudio = false;
-
-
-                // Verificar que siga siendo la canción actual
-
-                if (radio.cancionActual !== id) {
-                    return;
-                }
-
-
-                const ahora =
-                    Date.now();
-
-
-                const tiempoTranscurrido =
-                    (ahora - inicio) / 1000;
-
-
-                if (!Number.isFinite(tiempoTranscurrido)) {
-                    return;
-                }
-
-
-                if (
-                    !Number.isFinite(audioRadio.duration)
-                ) {
-                    return;
-                }
-
-
-                if (
-                    tiempoTranscurrido >=
-                    audioRadio.duration
-                ) {
-                    return;
-                }
-
-
-                if (tiempoTranscurrido < 0) {
-                    return;
-                }
-
-
-                // Ir directamente al momento correcto
-
-                audioRadio.currentTime =
-                    tiempoTranscurrido;
-
-
-                audioRadio.play()
-                    .then(function () {
-
-                        // Verificar nuevamente
-
-                        if (
-                            radio.cancionActual !== id
-                        ) {
-
-                            audioRadio.pause();
-
-                            return;
-                        }
-
-
-                        audioActivo = true;
-
-                        idAudioActual = id;
-
-
-                        botonEscuchar.textContent =
-                            "⏸️ Pausar radio";
-                    })
-
-                    .catch(function (error) {
+                    if (
+                        radio.cancionActual !== id
+                    ) {
 
                         console.log(
-                            "No se pudo reproducir automáticamente:",
-                            error
+                            "La marcha cambió mientras se cargaba el audio."
                         );
 
-                        audioActivo = false;
+                        return;
+                    }
 
-                        idAudioActual = null;
+
+                    const ahora =
+                        Date.now();
+
+
+                    const tiempoTranscurrido =
+                        (
+                            ahora -
+                            inicio
+                        ) / 1000;
+
+
+                    console.log(
+                        "=============================="
+                    );
+
+
+                    console.log(
+                        "🎵 Marcha:",
+                        cancion.titulo
+                    );
+
+
+                    console.log(
+                        "⏱️ inicioEmision:",
+                        inicio
+                    );
+
+
+                    console.log(
+                        "🕐 Ahora:",
+                        ahora
+                    );
+
+
+                    console.log(
+                        "▶️ Segundos transcurridos:",
+                        tiempoTranscurrido
+                    );
+
+
+                    console.log(
+                        "⏳ Duración:",
+                        audioRadio.duration
+                    );
+
+
+                    if (
+                        !Number.isFinite(
+                            tiempoTranscurrido
+                        )
+                    ) {
+
+                        console.error(
+                            "El tiempo de sincronización no es válido."
+                        );
 
                         botonEscuchar.textContent =
                             "🎧 Escuchar radio";
-                    });
-            };
+
+                        return;
+                    }
+
+
+                    if (
+                        tiempoTranscurrido >=
+                        audioRadio.duration
+                    ) {
+
+                        console.log(
+                            "La marcha ya terminó."
+                        );
+
+                        botonEscuchar.textContent =
+                            "🎧 Escuchar radio";
+
+                        return;
+                    }
+
+
+                    if (
+                        tiempoTranscurrido < 0
+                    ) {
+
+                        console.log(
+                            "El tiempo calculado es negativo."
+                        );
+
+                        botonEscuchar.textContent =
+                            "🎧 Escuchar radio";
+
+                        return;
+                    }
+
+
+                    console.log(
+                        "⏩ Saltando al segundo:",
+                        tiempoTranscurrido
+                    );
+
+
+                    try {
+
+                        audioRadio.currentTime =
+                            tiempoTranscurrido;
+
+                    } catch (error) {
+
+                        console.error(
+                            "Error al cambiar currentTime:",
+                            error
+                        );
+
+                        botonEscuchar.textContent =
+                            "🎧 Escuchar radio";
+
+                        return;
+                    }
+
+
+                    console.log(
+                        "📍 currentTime:",
+                        audioRadio.currentTime
+                    );
+
+
+                    audioRadio.play()
+                        .then(function () {
+
+                            if (
+                                radio.cancionActual !== id
+                            ) {
+
+                                audioRadio.pause();
+
+                                return;
+                            }
+
+
+                            audioActivo =
+                                true;
+
+
+                            idAudioActual =
+                                id;
+
+
+                            botonEscuchar.textContent =
+                                "⏸️ Pausar radio";
+
+
+                            console.log(
+                                "✅ Radio sincronizada."
+                            );
+
+
+                            console.log(
+                                "🎧 Reproduciendo desde:",
+                                audioRadio.currentTime
+                            );
+
+                        })
+                        .catch(function(error) {
+
+                            console.error(
+                                "❌ No se pudo reproducir:",
+                                error
+                            );
+
+
+                            audioActivo =
+                                false;
+
+
+                            botonEscuchar.textContent =
+                                "🎧 Escuchar radio";
+
+                        });
+
+                };
 
 
             audioRadio.addEventListener(
@@ -549,236 +770,258 @@
 
 
             audioRadio.load();
+
         }
 
 
-        // =====================================================
-        // FIREBASE: RADIO
-        // =====================================================
+        // =========================
+        // RADIO
+        // =========================
 
         onValue(
             radioRef,
-            function (snapshot) {
+            function(snapshot) {
 
-                const datos =
-                    snapshot.val();
-
-
-                if (datos) {
-
-                    radio = datos;
-
-                } else {
-
-                    radio = {};
-                }
+                const radioAnterior =
+                    radio;
 
 
-                radioCargado = true;
+                radio =
+                    snapshot.val() || {};
+
+
+                radioCargado =
+                    true;
 
 
                 actualizarPantalla();
 
 
-                // Si la radio está transmitiendo,
-                // comprobar la canción actual
+                const marchaCambio =
+                    radioAnterior.cancionActual !==
+                    radio.cancionActual;
+
+
+                const estado =
+                    String(
+                        radio.estado || ""
+                    ).trim();
+
 
                 if (
-                    radio.estado === "playing" ||
-                    radio.estado === "En emisión"
+                    estado !== "playing" &&
+                    estado !== "En emisión"
                 ) {
 
-                    const id =
-                        radio.cancionActual;
-
-
-                    if (
-                        id &&
-                        canciones[id] &&
-                        id !== idAudioActual
-                    ) {
+                    if (audioActivo) {
 
                         audioRadio.pause();
 
-                        audioRadio.currentTime = 0;
 
-                        audioActivo = false;
-
-                        idAudioActual = null;
-
-                        cargandoAudio = false;
+                        audioActivo =
+                            false;
 
 
-                        // Solo sincronizar si
-                        // ya tenemos las canciones
+                        idAudioActual =
+                            null;
 
-                        if (cancionesCargadas) {
 
-                            reproducirSincronizado(id);
-                        }
+                        botonEscuchar.textContent =
+                            "🎧 Escuchar radio";
                     }
+
+
+                    return;
                 }
+
+
+                // Si cambió la marcha y ya estaba
+                // reproduciendo, sincronizar la nueva
+                if (
+                    audioActivo &&
+                    marchaCambio
+                ) {
+
+                    console.log(
+                        "🔄 Cambió la marcha. Sincronizando..."
+                    );
+
+
+                    audioRadio.pause();
+
+
+                    audioActivo =
+                        false;
+
+
+                    idAudioActual =
+                        null;
+
+
+                    botonEscuchar.textContent =
+                        "🎧 Escuchar radio";
+
+
+                    if (cancionesCargadas) {
+
+                        reproducirSincronizado();
+                    }
+
+                }
+
             }
         );
 
 
-        // =====================================================
-        // FIREBASE: CANCIONES
-        // =====================================================
+        // =========================
+        // CANCIONES
+        // =========================
 
         onValue(
             cancionesRef,
-            function (snapshot) {
+            function(snapshot) {
 
-                const datos =
-                    snapshot.val();
-
-
-                if (datos) {
-
-                    canciones = datos;
-
-                } else {
-
-                    canciones = {};
-                }
+                canciones =
+                    snapshot.val() || {};
 
 
-                cancionesCargadas = true;
+                cancionesCargadas =
+                    true;
 
 
                 actualizarPantalla();
 
 
-                // Si radio ya cargó y hay canción
-                // actualmente en emisión
+                // Si la radio ya cargó y está
+                // emitiendo una canción, comprobar
+                // si necesitamos sincronizarla
 
-                if (radioCargado) {
+                if (
+                    radioCargado
+                ) {
 
-                    const id =
-                        radio.cancionActual;
+                    const estado =
+                        String(
+                            radio.estado || ""
+                        ).trim();
 
 
                     if (
-                        id &&
-                        canciones[id] &&
                         (
-                            radio.estado === "playing" ||
-                            radio.estado === "En emisión"
-                        )
+                            estado === "playing" ||
+                            estado === "En emisión"
+                        ) &&
+                        radio.cancionActual &&
+                        !audioActivo
                     ) {
 
-                        if (
-                            idAudioActual !== id &&
-                            !audioActivo
-                        ) {
-
-                            reproducirSincronizado(id);
-                        }
+                        // NO iniciar automáticamente
+                        // para evitar que el navegador
+                        // bloquee el audio.
+                        //
+                        // El usuario puede pulsar
+                        // "Escuchar radio".
                     }
                 }
+
             }
         );
 
 
-        // =====================================================
-        // BOTÓN ESCUCHAR / PAUSAR
-        // =====================================================
+        // =========================
+        // BOTÓN ESCUCHAR RADIO
+        // =========================
 
         botonEscuchar.addEventListener(
             "click",
-            function () {
+            function() {
 
                 const id =
                     radio.cancionActual;
 
 
-                if (!id || !canciones[id]) {
+                if (!id) {
+
+                    alert(
+                        "No hay ninguna marcha en emisión."
+                    );
+
                     return;
                 }
 
 
-                // Si ya está sonando
+                const cancion =
+                    canciones[id];
 
-                if (
-                    audioActivo &&
-                    idAudioActual === id
-                ) {
+
+                if (!cancion) {
+
+                    alert(
+                        "No se encontró la marcha."
+                    );
+
+                    return;
+                }
+
+
+                if (!cancion.audio) {
+
+                    alert(
+                        "Esta marcha no tiene audio."
+                    );
+
+                    return;
+                }
+
+
+                if (audioActivo) {
 
                     audioRadio.pause();
 
-                    audioActivo = false;
+
+                    audioActivo =
+                        false;
+
 
                     botonEscuchar.textContent =
-                        "▶️ Continuar radio";
+                        "🎧 Escuchar radio";
+
 
                     return;
                 }
 
 
-                // Si estaba pausado, continuar
+                reproducirSincronizado();
 
-                if (
-                    audioRadio.src &&
-                    idAudioActual === id &&
-                    audioRadio.paused
-                ) {
-
-                    audioRadio.play()
-                        .then(function () {
-
-                            audioActivo = true;
-
-                            botonEscuchar.textContent =
-                                "⏸️ Pausar radio";
-                        })
-
-                        .catch(function (error) {
-
-                            console.log(error);
-                        });
-
-                    return;
-                }
-
-
-                // Si es una nueva canción,
-                // sincronizar desde el tiempo correcto
-
-                reproducirSincronizado(id);
             }
         );
 
 
-        // =====================================================
-        // CUANDO TERMINA UNA CANCIÓN
-        // =====================================================
+        // =========================
+        // CUANDO TERMINA EL AUDIO
+        // =========================
 
         audioRadio.addEventListener(
             "ended",
-            function () {
+            function() {
 
-                audioActivo = false;
+                audioActivo =
+                    false;
 
-                idAudioActual = null;
+
+                idAudioActual =
+                    null;
+
 
                 botonEscuchar.textContent =
                     "🎧 Escuchar radio";
+
             }
         );
 
 
-        // =====================================================
-        // INICIO
-        // =====================================================
-
-        cargando.style.display =
-            "block";
-
-        texto.style.display =
-            "none";
-
     </script>
+
 
 </body>
 
