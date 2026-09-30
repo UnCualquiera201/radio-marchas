@@ -155,7 +155,6 @@
 
 </div>
 
-
 <div id="controles">
 
     <button id="previous">
@@ -180,17 +179,12 @@
 
 </div>
 
-
-<audio id="audio"></audio>
-
+<audio id="audio" preload="auto"></audio>
 
 <div id="cola">
     <h3>Cola</h3>
     <div id="listaCola"></div>
 </div>
-
-
-<!-- EDITOR DEL ORDEN -->
 
 <div id="editorOrden">
 
@@ -209,9 +203,6 @@
     <div id="mensajeOrden"></div>
 
 </div>
-
-
-<!-- EDITOR DE IMAGEN -->
 
 <div id="editor">
 
@@ -299,29 +290,35 @@ const ordenRef = ref(db, "radio/orden");
 ========================================================= */
 
 let radio = {};
-
 let canciones = {};
-
 let listaCanciones = [];
-
 let indiceActual = 0;
-
 let cancionActualId = "marcha1";
-
 let datosCanciones = {};
-
 let ordenGuardado = [];
 
 let posicionX = 50;
-
 let posicionY = 50;
+
+/*
+ * Número de operación de audio.
+ *
+ * Cada vez que comenzamos una nueva reproducción
+ * aumenta este número.
+ *
+ * Si una operación antigua intenta continuar,
+ * se cancela.
+ */
+
+let operacionAudio = 0;
 
 
 /* =========================================================
    ELEMENTOS
 ========================================================= */
 
-const audioElement = document.getElementById("audio");
+const audioElement =
+    document.getElementById("audio");
 
 const estadoElement =
     document.getElementById("estado");
@@ -367,10 +364,10 @@ const mensaje =
 
 
 /* =========================================================
-   MOSTRAR DATOS DE LA MARCHA
+   CARGAR DATOS VISUALES DE UNA MARCHA
 ========================================================= */
 
-async function mostrarCancionPorId(id, reproducir = false) {
+async function cargarDatosCancion(id) {
 
     if (!id) {
         return;
@@ -397,15 +394,21 @@ async function mostrarCancionPorId(id, reproducir = false) {
         const cancion =
             snapshot.val();
 
-        datosCanciones[id] = cancion;
+        datosCanciones[id] =
+            cancion;
 
-        cancionActualId = id;
+        cancionActualId =
+            id;
+
 
         const posicion =
             listaCanciones.indexOf(id);
 
         if (posicion !== -1) {
-            indiceActual = posicion;
+
+            indiceActual =
+                posicion;
+
         }
 
 
@@ -441,7 +444,9 @@ async function mostrarCancionPorId(id, reproducir = false) {
             radioFondo.style.backgroundImage =
                 "none";
 
-            imagenEditor.src = "";
+            imagenEditor.src =
+                "";
+
         }
 
 
@@ -453,24 +458,6 @@ async function mostrarCancionPorId(id, reproducir = false) {
 
         aplicarPosicionImagen();
 
-
-        if (reproducir && cancion.audio) {
-
-            audioElement.src =
-                cancion.audio;
-
-            audioElement.currentTime = 0;
-
-            try {
-                await audioElement.play();
-            } catch (error) {
-                console.log(
-                    "No se pudo reproducir automáticamente:",
-                    error
-                );
-            }
-        }
-
         actualizarCola();
 
     } catch (error) {
@@ -479,7 +466,299 @@ async function mostrarCancionPorId(id, reproducir = false) {
             "Error cargando la marcha:",
             error
         );
+
     }
+}
+
+
+/* =========================================================
+   REPRODUCIR AUDIO DEL PANEL
+========================================================= */
+
+async function reproducirAudio(id, sincronizar = false) {
+
+    const cancion =
+        canciones[id];
+
+    if (!cancion || !cancion.audio) {
+
+        console.log(
+            "La marcha no tiene audio:",
+            id
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * Crear nueva operación.
+     */
+
+    operacionAudio++;
+
+    const miOperacion =
+        operacionAudio;
+
+
+    console.log(
+        "🎵 CARGANDO AUDIO:",
+        id
+    );
+
+
+    /*
+     * Detener completamente la reproducción
+     * anterior.
+     */
+
+    audioElement.pause();
+
+    audioElement.removeAttribute("src");
+
+    audioElement.load();
+
+
+    /*
+     * Esperar un pequeño instante para evitar
+     * que la operación anterior interfiera.
+     */
+
+    await new Promise(function(resolve) {
+
+        setTimeout(
+            resolve,
+            50
+        );
+
+    });
+
+
+    /*
+     * Comprobar si esta operación todavía
+     * es válida.
+     */
+
+    if (
+        miOperacion !== operacionAudio
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+     * Cargar nuevo audio.
+     */
+
+    audioElement.src =
+        cancion.audio;
+
+    audioElement.load();
+
+
+    /*
+     * Esperar a que el audio tenga datos
+     * suficientes para comenzar.
+     */
+
+    await new Promise(function(resolve, reject) {
+
+        let terminado = false;
+
+
+        function limpiar() {
+
+            audioElement.removeEventListener(
+                "canplay",
+                listo
+            );
+
+            audioElement.removeEventListener(
+                "error",
+                error
+            );
+
+        }
+
+
+        function listo() {
+
+            if (terminado) {
+                return;
+            }
+
+            terminado = true;
+
+            limpiar();
+
+            resolve();
+
+        }
+
+
+        function error(event) {
+
+            if (terminado) {
+                return;
+            }
+
+            terminado = true;
+
+            limpiar();
+
+            reject(event);
+
+        }
+
+
+        audioElement.addEventListener(
+            "canplay",
+            listo,
+            {
+                once: true
+            }
+        );
+
+        audioElement.addEventListener(
+            "error",
+            error,
+            {
+                once: true
+            }
+        );
+
+    }).catch(function(error) {
+
+        if (
+            miOperacion === operacionAudio
+        ) {
+
+            console.error(
+                "❌ Error cargando audio:",
+                error
+            );
+
+        }
+
+        return;
+
+    });
+
+
+    /*
+     * La operación pudo haber sido cancelada
+     * mientras cargaba.
+     */
+
+    if (
+        miOperacion !== operacionAudio
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+     * Si estamos reproduciendo manualmente
+     * la marcha actual, podemos sincronizarla
+     * con inicioEmision.
+     *
+     * Para Siguiente/Anterior/fin de marcha
+     * se empieza desde 0.
+     */
+
+    if (
+        sincronizar &&
+        radio.cancionActual === id &&
+        radio.inicioEmision
+    ) {
+
+        const segundos =
+            Math.max(
+                0,
+                (Date.now() -
+                    radio.inicioEmision) /
+                1000
+            );
+
+
+        /*
+         * No pasar del final.
+         */
+
+        if (
+            Number.isFinite(
+                audioElement.duration
+            ) &&
+            segundos <
+                audioElement.duration
+        ) {
+
+            audioElement.currentTime =
+                segundos;
+
+        }
+
+    } else {
+
+        audioElement.currentTime =
+            0;
+
+    }
+
+
+    /*
+     * Reproducir.
+     */
+
+    try {
+
+        await audioElement.play();
+
+        if (
+            miOperacion !== operacionAudio
+        ) {
+
+            audioElement.pause();
+
+            return;
+
+        }
+
+
+        console.log(
+            "🔊 REPRODUCIENDO:",
+            id
+        );
+
+    } catch (error) {
+
+        /*
+         * Si otra operación ya reemplazó
+         * esta reproducción, no mostrarlo
+         * como error importante.
+         */
+
+        if (
+            miOperacion !== operacionAudio
+        ) {
+
+            return;
+
+        }
+
+
+        console.error(
+            "❌ Error al reproducir:",
+            error
+        );
+
+    }
+
 }
 
 
@@ -494,6 +773,7 @@ function aplicarPosicionImagen() {
 
     imagenEditor.style.objectPosition =
         `${posicionX}% ${posicionY}%`;
+
 }
 
 
@@ -511,11 +791,6 @@ onValue(
         datosCanciones =
             canciones;
 
-
-        /*
-         * Primero intentamos utilizar el orden
-         * guardado en Firebase.
-         */
 
         try {
 
@@ -535,50 +810,50 @@ onValue(
             );
 
             ordenGuardado = [];
+
         }
 
-
-        /*
-         * Crear lista nueva
-         */
 
         listaCanciones = [];
 
 
-        /*
-         * Agregar primero las canciones
-         * que están en el orden guardado.
-         */
+        if (
+            Array.isArray(
+                ordenGuardado
+            )
+        ) {
 
-        if (Array.isArray(ordenGuardado)) {
+            ordenGuardado.forEach(
+                function(id) {
 
-            ordenGuardado.forEach(function(id) {
+                    if (
+                        canciones[id] &&
+                        !listaCanciones.includes(id)
+                    ) {
+
+                        listaCanciones.push(id);
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        Object.keys(canciones).forEach(
+            function(id) {
 
                 if (
-                    canciones[id] &&
                     !listaCanciones.includes(id)
                 ) {
 
                     listaCanciones.push(id);
+
                 }
 
-            });
-        }
-
-
-        /*
-         * Agregar cualquier canción que
-         * no estuviera en el orden.
-         */
-
-        Object.keys(canciones).forEach(function(id) {
-
-            if (!listaCanciones.includes(id)) {
-
-                listaCanciones.push(id);
             }
-
-        });
+        );
 
 
         console.log(
@@ -587,49 +862,49 @@ onValue(
         );
 
 
-        /*
-         * Crear selector del editor
-         */
-
         selectorCancion.innerHTML =
             '<option value="">Seleccionar marcha</option>';
 
 
-        listaCanciones.forEach(function(id) {
+        listaCanciones.forEach(
+            function(id) {
 
-            const cancion =
-                canciones[id];
+                const cancion =
+                    canciones[id];
 
-            const option =
-                document.createElement("option");
+                const option =
+                    document.createElement(
+                        "option"
+                    );
 
-            option.value = id;
+                option.value =
+                    id;
 
-            option.textContent =
-                cancion.titulo || id;
+                option.textContent =
+                    cancion.titulo || id;
 
-            selectorCancion.appendChild(option);
+                selectorCancion.appendChild(
+                    option
+                );
 
-        });
+            }
+        );
 
-
-        /*
-         * Si ya tenemos una canción actual,
-         * actualizar su índice.
-         */
 
         const indice =
-            listaCanciones.indexOf(cancionActualId);
+            listaCanciones.indexOf(
+                cancionActualId
+            );
 
         if (indice !== -1) {
 
-            indiceActual = indice;
+            indiceActual =
+                indice;
 
         }
 
 
         actualizarEditorOrden();
-
         actualizarCola();
 
     }
@@ -649,38 +924,74 @@ onValue(
 
 
         estadoElement.textContent =
-            radio.estado || "Sin emisión";
+            radio.estado ||
+            "Sin emisión";
 
 
         /*
-         * Si Firebase indica una canción
-         * diferente, cargarla.
+         * IMPORTANTE:
+         *
+         * Aquí YA NO reproducimos audio.
+         *
+         * Solo actualizamos los datos visuales.
+         *
+         * Esto evita que Firebase y los botones
+         * intenten cambiar el audio al mismo tiempo.
          */
 
         if (
-            radio.cancionActual &&
-            radio.cancionActual !== cancionActualId
+            radio.cancionActual
         ) {
 
-            await mostrarCancionPorId(
-                radio.cancionActual,
-                false
-            );
+            const nuevoId =
+                radio.cancionActual;
+
+
+            if (
+                nuevoId !==
+                cancionActualId
+            ) {
+
+                await cargarDatosCancion(
+                    nuevoId
+                );
+
+            }
 
         }
 
 
-        /*
-         * Actualizar el estado visual
-         */
-
         if (
-            radio.estado === "En emisión" ||
-            radio.estado === "playing"
+            radio.estado ===
+                "En emisión" ||
+            radio.estado ===
+                "playing"
         ) {
 
             estadoElement.textContent =
                 "🔴 EN EMISIÓN";
+
+        }
+
+
+        if (
+            radio.estado ===
+                "Pausado"
+        ) {
+
+            estadoElement.textContent =
+                "⏸️ PAUSADO";
+
+        }
+
+
+        if (
+            radio.estado ===
+                "stopped"
+        ) {
+
+            estadoElement.textContent =
+                "⏹️ DETENIDO";
 
         }
 
@@ -699,15 +1010,25 @@ function actualizarCola() {
 
     listaCola.innerHTML = "";
 
-    if (!Array.isArray(listaCanciones)) {
+    if (
+        !Array.isArray(listaCanciones)
+    ) {
+
         return;
+
     }
 
+
     const indice =
-        listaCanciones.indexOf(cancionActualId);
+        listaCanciones.indexOf(
+            cancionActualId
+        );
+
 
     if (indice === -1) {
+
         return;
+
     }
 
 
@@ -724,11 +1045,16 @@ function actualizarCola() {
             canciones[id];
 
         if (!cancion) {
+
             continue;
+
         }
 
+
         const div =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
 
         div.textContent =
             cancion.titulo || id;
@@ -736,8 +1062,12 @@ function actualizarCola() {
         div.style.padding =
             "8px 0";
 
-        listaCola.appendChild(div);
+        listaCola.appendChild(
+            div
+        );
+
     }
+
 }
 
 
@@ -752,30 +1082,44 @@ document
         async function() {
 
             if (!cancionActualId) {
+
                 return;
+
             }
 
 
             const cancion =
-                canciones[cancionActualId];
+                canciones[
+                    cancionActualId
+                ];
 
-            if (!cancion || !cancion.audio) {
+
+            if (
+                !cancion ||
+                !cancion.audio
+            ) {
 
                 console.log(
                     "La marcha no tiene audio."
                 );
 
                 return;
+
             }
 
 
             const posicionActual =
-                Number(audioElement.currentTime) || 0;
+                Number(
+                    audioElement.currentTime
+                ) || 0;
 
 
             const nuevoInicio =
                 Date.now() -
-                (posicionActual * 1000);
+                (
+                    posicionActual *
+                    1000
+                );
 
 
             try {
@@ -783,24 +1127,28 @@ document
                 await update(
                     radioRef,
                     {
-                        estado: "En emisión",
+                        estado:
+                            "En emisión",
+
                         cancionActual:
                             cancionActualId,
+
                         inicioEmision:
                             nuevoInicio
                     }
                 );
 
 
-                audioElement.src =
-                    cancion.audio;
+                /*
+                 * El audio se reproduce SOLO
+                 * desde aquí.
+                 */
 
+                await reproducirAudio(
+                    cancionActualId,
+                    false
+                );
 
-                audioElement.currentTime =
-                    posicionActual;
-
-
-                await audioElement.play();
 
             } catch (error) {
 
@@ -808,6 +1156,7 @@ document
                     "Error al reproducir:",
                     error
                 );
+
             }
 
         }
@@ -824,6 +1173,8 @@ document
         "click",
         async function() {
 
+            operacionAudio++;
+
             audioElement.pause();
 
             try {
@@ -831,13 +1182,16 @@ document
                 await update(
                     radioRef,
                     {
-                        estado: "Pausado"
+                        estado:
+                            "Pausado"
                     }
                 );
 
             } catch (error) {
 
-                console.error(error);
+                console.error(
+                    error
+                );
 
             }
 
@@ -855,9 +1209,13 @@ document
         "click",
         async function() {
 
+            operacionAudio++;
+
             audioElement.pause();
 
-            audioElement.currentTime = 0;
+            audioElement.currentTime =
+                0;
+
 
             try {
 
@@ -865,13 +1223,15 @@ document
                     radioRef,
                     {
                         estado:
-                            "Fin de emisión"
+                            "stopped"
                     }
                 );
 
             } catch (error) {
 
-                console.error(error);
+                console.error(
+                    error
+                );
 
             }
 
@@ -894,12 +1254,10 @@ document
             );
 
 
-            /*
-             * Verificar que la lista exista.
-             */
-
             if (
-                !Array.isArray(listaCanciones) ||
+                !Array.isArray(
+                    listaCanciones
+                ) ||
                 listaCanciones.length === 0
             ) {
 
@@ -908,13 +1266,9 @@ document
                 );
 
                 return;
+
             }
 
-
-            /*
-             * IMPORTANTE:
-             * buscar nuevamente la posición real.
-             */
 
             let indiceReal =
                 listaCanciones.indexOf(
@@ -938,47 +1292,44 @@ document
             );
 
 
-            if (indiceReal === -1) {
+            if (
+                indiceReal === -1 &&
+                radio.cancionActual
+            ) {
 
-                /*
-                 * Intento adicional usando
-                 * el valor de Firebase.
-                 */
+                indiceReal =
+                    listaCanciones.indexOf(
+                        radio.cancionActual
+                    );
 
-                if (radio.cancionActual) {
+                if (
+                    indiceReal !== -1
+                ) {
 
-                    indiceReal =
-                        listaCanciones.indexOf(
-                            radio.cancionActual
-                        );
+                    cancionActualId =
+                        radio.cancionActual;
 
-                    if (indiceReal !== -1) {
-
-                        cancionActualId =
-                            radio.cancionActual;
-
-                    }
                 }
+
             }
 
 
-            if (indiceReal === -1) {
+            if (
+                indiceReal === -1
+            ) {
 
                 alert(
                     "No se encontró la marcha actual en el orden."
                 );
 
                 return;
+
             }
 
 
             indiceActual =
                 indiceReal;
 
-
-            /*
-             * Comprobar última marcha.
-             */
 
             if (
                 indiceReal >=
@@ -990,6 +1341,7 @@ document
                 );
 
                 return;
+
             }
 
 
@@ -1007,12 +1359,29 @@ document
 
             try {
 
+                /*
+                 * Cancelar cualquier reproducción
+                 * anterior antes de cambiar.
+                 */
+
+                operacionAudio++;
+
+                audioElement.pause();
+
+
+                /*
+                 * Actualizar Firebase.
+                 */
+
                 await update(
                     radioRef,
                     {
-                        estado: "En emisión",
+                        estado:
+                            "En emisión",
+
                         cancionActual:
                             siguienteId,
+
                         inicioEmision:
                             Date.now()
                     }
@@ -1020,8 +1389,7 @@ document
 
 
                 /*
-                 * También actualizamos localmente
-                 * para que el botón responda inmediatamente.
+                 * Actualizar variables locales.
                  */
 
                 cancionActualId =
@@ -1031,22 +1399,32 @@ document
                     indiceReal + 1;
 
 
-                await mostrarCancionPorId(
+                /*
+                 * Cargar datos visuales.
+                 */
+
+                await cargarDatosCancion(
+                    siguienteId
+                );
+
+
+                /*
+                 * REPRODUCIR DESDE 0:00.
+                 */
+
+                await reproducirAudio(
                     siguienteId,
-                    true
+                    false
                 );
 
 
             } catch (error) {
 
                 console.error(
-                    "No se pudo cambiar la marcha:",
+                    "No se pudo cambiar de marcha:",
                     error
                 );
 
-                alert(
-                    "Error al cambiar de marcha. Revisa la consola."
-                );
             }
 
         }
@@ -1069,7 +1447,9 @@ document
 
 
             if (
-                !Array.isArray(listaCanciones) ||
+                !Array.isArray(
+                    listaCanciones
+                ) ||
                 listaCanciones.length === 0
             ) {
 
@@ -1078,12 +1458,9 @@ document
                 );
 
                 return;
+
             }
 
-
-            /*
-             * Buscar nuevamente la posición real.
-             */
 
             let indiceReal =
                 listaCanciones.indexOf(
@@ -1102,32 +1479,38 @@ document
             );
 
 
-            if (indiceReal === -1) {
+            if (
+                indiceReal === -1 &&
+                radio.cancionActual
+            ) {
 
-                if (radio.cancionActual) {
+                indiceReal =
+                    listaCanciones.indexOf(
+                        radio.cancionActual
+                    );
 
-                    indiceReal =
-                        listaCanciones.indexOf(
-                            radio.cancionActual
-                        );
+                if (
+                    indiceReal !== -1
+                ) {
 
-                    if (indiceReal !== -1) {
+                    cancionActualId =
+                        radio.cancionActual;
 
-                        cancionActualId =
-                            radio.cancionActual;
-
-                    }
                 }
+
             }
 
 
-            if (indiceReal === -1) {
+            if (
+                indiceReal === -1
+            ) {
 
                 alert(
                     "No se encontró la marcha actual en el orden."
                 );
 
                 return;
+
             }
 
 
@@ -1135,17 +1518,16 @@ document
                 indiceReal;
 
 
-            /*
-             * Comprobar primera marcha.
-             */
-
-            if (indiceReal <= 0) {
+            if (
+                indiceReal <= 0
+            ) {
 
                 alert(
                     "Ya estás en la primera marcha."
                 );
 
                 return;
+
             }
 
 
@@ -1163,12 +1545,28 @@ document
 
             try {
 
+                /*
+                 * Cancelar audio anterior.
+                 */
+
+                operacionAudio++;
+
+                audioElement.pause();
+
+
+                /*
+                 * Actualizar Firebase.
+                 */
+
                 await update(
                     radioRef,
                     {
-                        estado: "En emisión",
+                        estado:
+                            "En emisión",
+
                         cancionActual:
                             anteriorId,
+
                         inicioEmision:
                             Date.now()
                     }
@@ -1182,22 +1580,32 @@ document
                     indiceReal - 1;
 
 
-                await mostrarCancionPorId(
+                /*
+                 * Cargar datos visuales.
+                 */
+
+                await cargarDatosCancion(
+                    anteriorId
+                );
+
+
+                /*
+                 * Reproducir desde 0:00.
+                 */
+
+                await reproducirAudio(
                     anteriorId,
-                    true
+                    false
                 );
 
 
             } catch (error) {
 
                 console.error(
-                    "No se pudo cambiar la marcha:",
+                    "No se pudo cambiar de marcha:",
                     error
                 );
 
-                alert(
-                    "Error al cambiar de marcha. Revisa la consola."
-                );
             }
 
         }
@@ -1212,6 +1620,12 @@ audioElement.addEventListener(
     "ended",
     async function() {
 
+        console.log(
+            "🎵 TERMINÓ:",
+            cancionActualId
+        );
+
+
         const indice =
             listaCanciones.indexOf(
                 cancionActualId
@@ -1221,7 +1635,7 @@ audioElement.addEventListener(
         if (
             indice !== -1 &&
             indice <
-            listaCanciones.length - 1
+                listaCanciones.length - 1
         ) {
 
             const siguienteId =
@@ -1230,26 +1644,80 @@ audioElement.addEventListener(
                 ];
 
 
+            console.log(
+                "🔄 PASANDO AUTOMÁTICAMENTE A:",
+                siguienteId
+            );
+
+
             try {
+
+                /*
+                 * Actualizar Firebase.
+                 */
 
                 await update(
                     radioRef,
                     {
-                        estado: "En emisión",
+                        estado:
+                            "En emisión",
+
                         cancionActual:
                             siguienteId,
+
                         inicioEmision:
                             Date.now()
                     }
                 );
 
+
+                /*
+                 * Actualizar variables locales.
+                 */
+
+                cancionActualId =
+                    siguienteId;
+
+                indiceActual =
+                    indice + 1;
+
+
+                /*
+                 * Mostrar nueva marcha.
+                 */
+
+                await cargarDatosCancion(
+                    siguienteId
+                );
+
+
+                /*
+                 * IMPORTANTE:
+                 *
+                 * La nueva marcha empieza
+                 * desde 0:00.
+                 */
+
+                await reproducirAudio(
+                    siguienteId,
+                    false
+                );
+
+
             } catch (error) {
 
-                console.error(error);
+                console.error(
+                    "Error pasando a la siguiente marcha:",
+                    error
+                );
 
             }
 
         } else {
+
+            /*
+             * Se acabaron las marchas.
+             */
 
             try {
 
@@ -1257,15 +1725,18 @@ audioElement.addEventListener(
                     radioRef,
                     {
                         estado:
-                            "Fin de emisión"
+                            "stopped"
                     }
                 );
 
             } catch (error) {
 
-                console.error(error);
+                console.error(
+                    error
+                );
 
             }
+
         }
 
     }
@@ -1288,19 +1759,25 @@ function actualizarEditorOrden() {
                 canciones[id];
 
             if (!cancion) {
+
                 return;
+
             }
 
 
             const bloque =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
 
             bloque.className =
                 "bloqueMarcha";
 
-            bloque.draggable = true;
+            bloque.draggable =
+                true;
 
-            bloque.dataset.id = id;
+            bloque.dataset.id =
+                id;
 
             bloque.textContent =
                 `${indice + 1}. ${
@@ -1351,10 +1828,12 @@ function actualizarEditorOrden() {
                     if (
                         !idArrastrado ||
                         !idDestino ||
-                        idArrastrado === idDestino
+                        idArrastrado ===
+                            idDestino
                     ) {
 
                         return;
+
                     }
 
 
@@ -1375,6 +1854,7 @@ function actualizarEditorOrden() {
                     ) {
 
                         return;
+
                     }
 
 
@@ -1404,6 +1884,7 @@ function actualizarEditorOrden() {
 
         }
     );
+
 }
 
 
@@ -1442,7 +1923,9 @@ document
 
             } catch (error) {
 
-                console.error(error);
+                console.error(
+                    error
+                );
 
                 mensajeOrden.textContent =
                     "❌ Error al guardar el orden.";
@@ -1464,16 +1947,22 @@ selectorCancion.addEventListener(
         const id =
             selectorCancion.value;
 
+
         if (!id) {
+
             return;
+
         }
 
 
         const cancion =
             canciones[id];
 
+
         if (!cancion) {
+
             return;
+
         }
 
 
@@ -1482,10 +1971,14 @@ selectorCancion.addEventListener(
 
 
         posicionX =
-            Number(cancion.posicionX ?? 50);
+            Number(
+                cancion.posicionX ?? 50
+            );
 
         posicionY =
-            Number(cancion.posicionY ?? 50);
+            Number(
+                cancion.posicionY ?? 50
+            );
 
 
         aplicarPosicionImagen();
@@ -1583,12 +2076,14 @@ document
             const id =
                 selectorCancion.value;
 
+
             if (!id) {
 
                 mensaje.textContent =
                     "Selecciona una marcha.";
 
                 return;
+
             }
 
 
@@ -1626,7 +2121,9 @@ document
 
             } catch (error) {
 
-                console.error(error);
+                console.error(
+                    error
+                );
 
                 mensaje.textContent =
                     "❌ Error al guardar.";
@@ -1641,9 +2138,8 @@ document
    INICIO
 ========================================================= */
 
-mostrarCancionPorId(
-    cancionActualId,
-    false
+cargarDatosCancion(
+    cancionActualId
 );
 
 </script>
