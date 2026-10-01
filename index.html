@@ -122,6 +122,11 @@
         margin-top: 10px;
         font-weight: bold;
     }
+
+    #mensajeDatos {
+        margin-top: 10px;
+        font-weight: bold;
+    }
 </style>
 </head>
 
@@ -152,6 +157,16 @@
 
     <label>Interpreta</label>
     <input id="interpreta" type="text">
+
+    <div class="grupoBotones">
+
+        <button id="guardarCambios">
+            💾 Guardar cambios
+        </button>
+
+    </div>
+
+    <div id="mensajeDatos"></div>
 
 </div>
 
@@ -372,6 +387,9 @@ const mensajeOrden =
 const mensaje =
     document.getElementById("mensaje");
 
+const mensajeDatos =
+    document.getElementById("mensajeDatos");
+
 
 /* =========================================================
    CARGAR DATOS VISUALES DE UNA MARCHA
@@ -481,6 +499,170 @@ async function cargarDatosCancion(id) {
     }
 
 }
+
+
+/* =========================================================
+   GUARDAR CAMBIOS DE DATOS DE LA MARCHA
+========================================================= */
+
+document
+    .getElementById("guardarCambios")
+    .addEventListener(
+        "click",
+        async function() {
+
+            const id =
+                cancionActualId;
+
+
+            if (!id) {
+
+                mensajeDatos.textContent =
+                    "Selecciona una marcha.";
+
+                return;
+
+            }
+
+
+            try {
+
+                /*
+                 * Guardamos los seis datos.
+                 *
+                 * Si Adaptación, Arreglo o
+                 * Rearmonización están vacíos,
+                 * se guardan como texto vacío.
+                 */
+
+                await update(
+                    ref(
+                        db,
+                        "canciones/" + id
+                    ),
+                    {
+                        titulo:
+                            tituloElement.value.trim(),
+
+                        compositor:
+                            compositorElement.value.trim(),
+
+                        adaptacion:
+                            adaptacionElement.value.trim(),
+
+                        arreglo:
+                            arregloElement.value.trim(),
+
+                        rearmonizacion:
+                            rearmonizacionElement.value.trim(),
+
+                        interpreta:
+                            interpretaElement.value.trim()
+                    }
+                );
+
+
+                /*
+                 * Actualizamos también los datos
+                 * locales inmediatamente.
+                 */
+
+                if (!datosCanciones[id]) {
+                    datosCanciones[id] = {};
+                }
+
+
+                datosCanciones[id].titulo =
+                    tituloElement.value.trim();
+
+                datosCanciones[id].compositor =
+                    compositorElement.value.trim();
+
+                datosCanciones[id].adaptacion =
+                    adaptacionElement.value.trim();
+
+                datosCanciones[id].arreglo =
+                    arregloElement.value.trim();
+
+                datosCanciones[id].rearmonizacion =
+                    rearmonizacionElement.value.trim();
+
+                datosCanciones[id].interpreta =
+                    interpretaElement.value.trim();
+
+
+                /*
+                 * Actualizamos la copia local.
+                 */
+
+                if (canciones[id]) {
+
+                    canciones[id].titulo =
+                        tituloElement.value.trim();
+
+                    canciones[id].compositor =
+                        compositorElement.value.trim();
+
+                    canciones[id].adaptacion =
+                        adaptacionElement.value.trim();
+
+                    canciones[id].arreglo =
+                        arregloElement.value.trim();
+
+                    canciones[id].rearmonizacion =
+                        rearmonizacionElement.value.trim();
+
+                    canciones[id].interpreta =
+                        interpretaElement.value.trim();
+
+                }
+
+
+                /*
+                 * Actualizamos el nombre de la marcha
+                 * en el selector y en la cola.
+                 */
+
+                actualizarEditorOrden();
+                actualizarCola();
+
+
+                mensajeDatos.textContent =
+                    "✅ Cambios guardados correctamente.";
+
+
+                setTimeout(
+                    function() {
+
+                        mensajeDatos.textContent =
+                            "";
+
+                    },
+                    3000
+                );
+
+
+                console.log(
+                    "💾 DATOS GUARDADOS:",
+                    id
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "Error al guardar los cambios:",
+                    error
+                );
+
+
+                mensajeDatos.textContent =
+                    "❌ Error al guardar los cambios.";
+
+            }
+
+        }
+    );
 
 
 /* =========================================================
